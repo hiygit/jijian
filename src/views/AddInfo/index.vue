@@ -1,0 +1,1515 @@
+﻿<template>
+  <div>
+    <!-- <breadcrumb /> -->
+    <!-- 面包屑导航 -->
+    <div class="navcrumbed">
+      <div class="navcrumbedimg" style="margin-left:10px;">
+        <img @click="goback" style="cursor: pointer;" src="@/assets/navblack.png" alt srcset />
+        <!-- <img src="@/assets/navblack.png" alt srcset /> -->
+        <span>当前位置：</span>
+      </div>
+      <div class="navcrumbedlist">
+        <el-breadcrumb separator-class="el-icon-arrow-right">
+          <el-breadcrumb-item :to="{ path: '/Home' }">首页</el-breadcrumb-item>
+          <el-breadcrumb-item><span style="color:#03d0ff">个人信息</span></el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+    </div>
+    <div class="content home">
+      <div class="AddInfo">
+        <span class="border row1"></span>
+        <span class="border row2"></span>
+        <span class="border col1"></span>
+        <span class="border col2"></span>
+        <div class="AddInfoMain">
+          <div class="addInfoMainTop">
+            <div class="AddInfoMainLeft">
+              <el-form :model="form" :label-width="labelWidth" :rules="rules" ref="form">
+                <el-form-item label="上传一寸红底照片" prop="redBottomPhoto">
+                  <div class="avatar-uploader">
+                    <img v-if="form.redBottomPhoto" :src="form.redBottomPhoto" />
+                    <img v-else src="../../assets/addpic.png" alt srcset />
+                    <input type="file" accept=".jpg, .jpeg, .png, .gif, .JPG, .JPEG" @change="handleAvatarSuccess($event)"/>
+                  </div>
+                </el-form-item>
+                <el-form-item label="姓名" prop="name">
+                  <el-input :disabled="disabled" v-model="form.name" placeholder="请填写姓名"></el-input>
+                </el-form-item>
+                <el-form-item label="性别" prop="sex">
+                  <el-radio :disabled="disabled" v-model="form.sex" :label="item.value" v-for="(item,index) in sexlist" :key="index">{{item.label}}</el-radio>
+                </el-form-item>
+                <el-form-item label="籍贯" prop="nativePlace">
+                  <el-input :disabled="disabled" v-model="form.nativePlace" placeholder="请填写籍贯"></el-input>
+                </el-form-item>
+                <el-form-item label="学历" prop="educationBackground">
+                  <el-select v-model="form.educationBackground" placeholder="请选择学历" :disabled="disabled">
+                    <el-option :label="item.label" :value="item.value" v-for="(item,index) in degreelist" :key="index"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="民族" prop="nation">
+                  <el-select v-model="form.nation" placeholder="请选择名族" :disabled="disabled">
+                    <el-option :label="item" :value="item" v-for="(item,index) in nationalities" :key="index"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="婚姻状况" prop="maritalStatus">
+                  <el-select v-model="form.maritalStatus" placeholder="请选择婚姻状况" :disabled="disabled">
+                    <el-option :label="item.label" :value="item.value" v-for="item in marriagelist" :key="item.value"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="出生日期" prop="birthday">
+                  <el-date-picker :disabled="disabled" v-model="form.birthday" type="date" placeholder="请选择出生日期" value-format="yyyy-MM-dd"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="身份证号" prop="idCard">
+                  <el-input :disabled="disabled" v-model="form.idCard" oninput="if(value.length>18)value=value.slice(0,18)" onkeyup="value=value.replace(/[^\d|X]/g,'')" placeholder="请填写身份证号"></el-input>
+                </el-form-item>
+                <el-form-item label="政治面貌" prop="politicsStatus">
+                  <el-select v-model="form.politicsStatus" placeholder="请选择政治面貌" :disabled="disabled">
+                    <el-option :label="item.label" :value="item.value" v-for="(item,index) in politicallist" :key="index"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="入党时间" prop="partyTime">
+                  <el-date-picker :disabled="disabled" v-model="form.partyTime" type="date" placeholder="请选择入党时间" value-format="yyyy-MM-dd"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="参加工作时间" prop="workTime">
+                  <el-date-picker :disabled="disabled" v-model="form.workTime" type="date"  placeholder="请选择参加工作时间" value-format="yyyy-MM-dd"></el-date-picker>
+                </el-form-item>
+                <div v-show="showOutOffice"> 
+                  <el-form-item label="工作单位" prop="outOfficeinput">
+                    <el-input :disabled="disabled" v-model="form.outOfficeinput" placeholder="请填写工作单位"></el-input>
+                  </el-form-item>
+                </div>
+                <div v-show="companyNameoff">
+                  <el-form-item label="工作单位" prop="companyName">
+                    <el-input :disabled="disabled" v-model="form.companyName" onmouseover="this.title=this.value" readonly v-if="showinputcompanyName" ></el-input>
+                    <el-cascader v-model="form.companyName" :options="unitslist" @active-item-change="unitChanges" placeholder="请选择单位名称" :props="{value: 'id',label: 'name',children: 'children'}">
+                    </el-cascader>
+                  </el-form-item>
+                </div>
+                <!------------------------------------ 新增在职情况 ------------------------------------>
+                <el-form-item label="在职情况" prop="workingState">
+                  <el-select v-model="form.workingState" placeholder="请选择" :disabled="disabled">
+                    <el-option v-for="item in workingStateList" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                  </el-select>
+                </el-form-item>
+                <!-- -------------------------------------------------------------------------------- -->
+                <el-form-item label="现任职务" prop="presentOccupation">
+                  <el-input :disabled="disabled" v-model="form.presentOccupation" placeholder="请填写现任职务"></el-input>
+                </el-form-item>
+                <el-form-item label="职务级别" prop="jobLevel">
+                  <el-select v-model="form.jobLevel" placeholder="请选择职务级别" :disabled="disabled">
+                    <el-option :label="item.label" :value="item.value" v-for="(item,index) in dutyRankList" :key="index"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="现任职务时间" prop="incumbentTime">
+                  <el-date-picker :disabled="disabled" v-model="form.incumbentTime" type="date" placeholder="请选择现任职务时间" value-format="yyyy-MM-dd"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="人员类型" prop="personnelcategory">
+                  <el-select v-model="form.personnelcategory" placeholder="请选择人员类型" :disabled="disabled">
+                    <el-option :label="item.label" :value="item.value" v-for="(item,index) in Personneltype" :key="index"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="职称" prop="titleJobs">
+                  <el-input :disabled="disabled" v-model="form.titleJobs" placeholder="请填写职称"></el-input>
+                </el-form-item>
+                <el-form-item label="职称级别" prop="titleJobsLevel">
+                  <el-select v-model="form.titleJobsLevel" placeholder="请选择职称级别" :disabled="disabled">
+                    <el-option :label="item.label" :value="item.value" v-for="(item,index) in zhichengjibie" :key="index"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="是否政协委员" prop="isCPPCCMemberOrNot">
+                  <el-radio :disabled="disabled" v-model="form.isCPPCCMemberOrNot" :label="item.value" v-for="(item,index) in isif" :key="index">{{item.label}}</el-radio>
+                </el-form-item>
+                <el-form-item label="是否人大代表" prop="isNPCDEputiesOrNot">
+                  <el-radio :disabled="disabled" v-model="form.isNPCDEputiesOrNot" :label="item.value" v-for="(item,index) in isif" :key="index">{{item.label}}</el-radio>
+                </el-form-item>
+                <el-form-item label="是否党代表" prop="isPartyRepresentativeOrNot">
+                  <el-radio :disabled="disabled" v-model="form.isPartyRepresentativeOrNot" :label="item.value" v-for="(item,index) in isif" :key="index">{{item.label}}</el-radio>
+                </el-form-item>
+                <!-- --------新增两个是否------- -->
+                <el-form-item label="是否市委委员" prop="isCommunistPartyMember">
+                  <el-radio :disabled="disabled" v-model="form.isCommunistPartyMember" :label="item.value" v-for="(item,index) in isif" :key="index">{{item.label}}</el-radio>
+                </el-form-item>
+                <el-form-item label="是否市纪委委员" prop="isCityCommissionPartyMember">
+                  <el-radio :disabled="disabled" v-model="form.isCityCommissionPartyMember" :label="item.value" v-for="(item,index) in isif" :key="index">{{item.label}}</el-radio>
+                </el-form-item>
+                <!-- ------------------ ------- -->
+                <el-form-item label="现住址" prop="presentAddress">
+                  <el-input :disabled="disabled" v-model="form.presentAddress" placeholder="请填写详细地址"></el-input>
+                </el-form-item>
+                <el-form-item label="联系电话" prop="phone">
+                  <el-input :disabled="disabled" v-model="form.phone" oninput="if(value.length>11)value=value.slice(0,11)" onkeyup="this.value=this.value.replace(/\D/g,'')" placeholder="请输入联系电话"></el-input>
+                </el-form-item>
+              </el-form>
+            </div>
+            <div class="AddInfoMainRight">
+              <div class="rightBlock">
+                <div class="rightTableFlex">
+                  <div class="rightTableTitle">
+                    <p class="rightTableMainTitle">家庭主要成员及主要社会关系</p>
+                    <p class="rightTableSubTitle">需填写（配偶、子女、双方父母、本人兄弟姐妹）若无该身份人员。则无需填写。注:已故上述人员，也需填写。</p>
+                  </div>
+                  <div class="rightTableBtn" v-if="!showinput">
+                    <button class="addTableRow" @click="addfamily">添加</button>
+                  </div>
+                </div>
+                <div>
+                  <el-table :data="familyMembers" border :height="tableHeight" stripe highlight-current-row style="background-color:transparent;width:100%;box-sizing:border-box;" :cell-style="cellStyle" :header-cell-style="headerCellStyle">
+                    <el-table-column label="称谓" prop="appellation" width="160">
+                      <template scope="scope">
+                        <el-input :disabled="disabled" style="display:inline-block;width:90%;margin:0 auto;" size="small" v-model="scope.row.appellation" placeholder="请输入内容"/>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="姓名" prop="name" width="160">
+                      <template scope="scope">
+                        <el-input :disabled="disabled" style="display:inline-block;width:90%;margin:0 auto;" size="small" v-model="scope.row.name" placeholder="请输入内容"/>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="政治面貌" prop="politicsStatus" width="350">
+                      <template scope="scope">
+                        <el-select v-model="scope.row.politicsStatus" placeholder="请选择政治面貌" :disabled="disabled">
+                          <el-option :label="item.label" :value="item.value" v-for="(item,index) in politicallist" :key="index"></el-option>
+                        </el-select>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="年龄" prop="age" width="160">
+                      <template scope="scope">
+                        <el-input :disabled="disabled" style="display:inline-block;width:90%;margin:0 auto;" size="small" v-model="scope.row.age" maxlength="2" onkeyup="this.value=this.value.replace(/\D/g,'')" placeholder="请输入内容"/>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="职务(级别)" prop="presentOccupation" width="300">
+                      <template scope="scope">
+                        <el-select v-model="scope.row.presentOccupation" placeholder="请选择职务级别" :disabled="disabled">
+                          <el-option :label="item.label" :value="item.value" v-for="(item,index) in dutyRankList" :key="index"></el-option>
+                        </el-select>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="工作单位" prop="companyName" width="350">
+                      <template scope="scope">
+                        <el-input :disabled="disabled" style="display:inline-block;width:90%;margin:0 auto;" size="small" v-model="scope.row.companyName" placeholder="请输入单位名称"/>
+                      </template>
+                    </el-table-column>
+                    <el-table-column :resizable="false" label="操作" width="200px">
+                      <template slot-scope="scope">
+                        <el-button type="primary" size="mini" @click="deletebtn(scope.$index, scope.row)">删除</el-button>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </div>
+              </div>
+              <div class="rightBlock">
+                <div class="rightTableFlex">
+                  <div class="rightTableTitle">
+                    <p class="rightTableMainTitle" style="margin-top:10px;">个人及配偶、共同生活的子女拥有的房产情况</p>
+                  </div>
+                  <div class="rightTableBtn" v-if="!showinput">
+                    <button class="addTableRow" @click="housingbtn">添加</button>
+                  </div>
+                </div>
+                <div>
+                  <el-table :data="housingSituations" border :height="tableHeight" stripe :disabled="disabled" style="background-color:transparent;width:100%;box-sizing:border-box;" :cell-style="cellStyle" :header-cell-style="headerCellStyle">
+                    <el-table-column label="序号" type="index" :index="indexinfo" width="100" prop="serialNumber">
+                      <!-- <template scope="scope">
+                        <el-input :disabled="disabled" style="display:inline-block;width:90%;margin:0 auto;" size="small" v-model="scope.row.serialNumber" placeholder="请输入内容"/>
+                      </template>-->
+                    </el-table-column>
+                    <el-table-column label="房号" prop="roomNumber" width="250">
+                      <template scope="scope">
+                        <el-input style="display:inline-block;width:90%;margin:0 auto;" size="small" v-model="scope.row.roomNumber" :disabled="disabled" placeholder="请输入内容"/>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="建筑面积(m²)" prop="coveredArea" width="160">
+                      <template scope="scope">
+                        <el-input style="display:inline-block;width:90%;margin:0 auto;" size="small" v-model="scope.row.coveredArea" :disabled="disabled" placeholder="请输入内容"
+                          @keyup.native="scope.row.coveredArea =scope.row.coveredArea = scope.row.coveredArea.replace(/[^\d.]/g,'');
+                                         scope.row.coveredArea = scope.row.coveredArea.replace(/\.{2,}/g,'.');
+                                         scope.row.coveredArea = scope.row.coveredArea.replace(/^\./g,'');
+                                         scope.row.coveredArea = scope.row.coveredArea.replace('.','$#$').replace(/\./g,'').replace('$#$','.');
+                                         scope.row.coveredArea = scope.row.coveredArea.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');"/>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="购买时间" prop="purchasingDate" width="230">
+                      <template scope="scope">
+                        <el-date-picker :disabled="disabled" v-model="scope.row.purchasingDate" type="date" placeholder="请选择购买时间" value-format="yyyy-MM-dd"></el-date-picker>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="购入价(万元)" prop="purchasePrice" width="160">
+                      <template scope="scope">
+                        <el-input :disabled="disabled" style="display:inline-block;width:90%;margin:0 auto;" size="small" v-model="scope.row.purchasePrice" placeholder="请输入内容"
+                          @keyup.native="scope.row.purchasePrice=scope.row.purchasePrice= scope.row.purchasePrice.replace(/[^\d.]/g,'');
+                                         scope.row.purchasePrice= scope.row.purchasePrice.replace(/\.{2,}/g,'.');
+                                         scope.row.purchasePrice= scope.row.purchasePrice.replace(/^\./g,'');
+                                         scope.row.purchasePrice= scope.row.purchasePrice.replace('.','$#$').replace(/\./g,'').replace('$#$','.');
+                                         scope.row.purchasePrice= scope.row.purchasePrice.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');"/>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="产权人" prop="propertyOwner" width="160">
+                      <template scope="scope">
+                        <el-input :disabled="disabled" style="display:inline-block;width:90%;margin:0 auto;" size="small" v-model="scope.row.propertyOwner" placeholder="请输入内容"/>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="所在位置" prop="location" width="350">
+                      <template scope="scope">
+                        <el-input :disabled="disabled" style="display:inline-block;width:90%;margin:0 auto;" size="small" v-model="scope.row.location" placeholder="请输入内容"/>
+                      </template>
+                    </el-table-column>
+                    <el-table-column :resizable="false" label="操作" width="200px">
+                      <template slot-scope="scope">
+                        <el-button type="primary" size="mini" @click="personageDeletebtn(scope.$index, scope.row)">删除</el-button>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </div>
+              </div>
+              <!-- textarea -->
+              <div class="rightTextareaBlock">
+                <p class="rightTextareaTitle">个人工作简历</p>
+                <el-input
+                  :disabled="disabled"
+                  v-model="form.personalResume"
+                  :autosize="{ minRows: 5, maxRows: 5}"
+                  type="textarea"
+                  placeholder="请填写工作经历"
+                />
+              </div>
+              <div class="rightTextareaBlock">
+                <p class="rightTextareaTitle">奖惩情况</p>
+                <el-input
+                  :disabled="disabled"
+                  v-model="form.rewardsAndPunishment"
+                  :autosize="{ minRows: 5, maxRows: 5}"
+                  type="textarea"
+                  placeholder="请填写奖惩情况"
+                />
+              </div>
+              <div class="rightTextareaBlock" style="border-bottom:none;">
+                <p class="rightTextareaTitle">其他相关情况</p>
+                <el-input
+                  :disabled="disabled"
+                  v-model="form.otherrelevantinformation"
+                  :autosize="{ minRows: 5, maxRows: 5}"
+                  type="textarea"
+                  placeholder="需向组织说明的其他相关情况"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="addInfoMainBot">
+            <button :disabled="disabled" class="bottomSaveBtn" v-if="!disabled" @click="savebtns('form')">保存</button>
+            <div class="exportbtn" @click="exportbtns" v-show="exportbtn">导出</div> <!-- 新增导出按钮 -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import qs from "qs";
+import Breadcrumb from "@/components/Breadcrumb";
+function clearNoNum(obj){
+  //先把非数字的都替换掉，除了数字和.
+  obj.value = obj.value.replace(/[^\d.]/g,"");
+  //保证只有出现一个.而没有多个.
+  obj.value = obj.value.replace(/\.{2,}/g,".");
+  //必须保证第一个为数字而不是.
+  obj.value = obj.value.replace(/^\./g,"");
+  //保证.只出现一次，而不能出现两次以上
+  obj.value = obj.value.replace(".","$#$").replace(/\./g,"").replace("$#$",".");
+  //只能输入两个小数
+  obj.value = obj.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');
+}
+export default {
+  name: "AddInfo",
+  props: {},
+  data() {
+    return {
+      // exportids: "",
+      showOutOffice: false,//新增为外部人员时显示 输入框
+      companyNameoff: false,//else显示 选择框
+      redpicimg:"",//给后台传值
+      redimg:"",//不带域名的图片路径
+      showinput: true, //工作单位查看时显示
+      disabled: false,
+      exportbtn:false,//导出按钮
+      labelWidth: "105px",
+      form: {
+        redBottomPhoto: "", //图片
+        name: "", //姓名
+        sex: "", //性别
+        nation: "", //民族
+        nativePlace: "", //籍贯
+        birthday: "", //生日
+        idCard: "", //身份证号
+        politicsStatus: "", //政治面貌
+        educationBackground: "", //学历
+        maritalStatus: "", //婚姻状况
+        partyTime: "", //入党时间
+        workTime: "", //工作时间
+        companyName: "",
+        companyNameid:"",
+        "office.name": "", //工作单位id
+        outOfficeinput: "",//外部人员的时候显示
+        workingState: "",//在职情况  新增
+        presentOccupation: "", //现任职务
+        jobLevel: "", //职务级别
+        incumbentTime: "", //现任职务时间
+        personnelcategory: "", //人员类型
+        titleJobs: "", //职称
+        titleJobsLevel: "", //职称级别
+        isCPPCCMemberOrNot: "", //是否是政协委员
+        isNPCDEputiesOrNot: "", //是否人大代表
+        isPartyRepresentativeOrNot: "", //是否党代表
+        // ===========新增两个是否===========
+        isCommunistPartyMember:"",//是否市委委员
+        isCityCommissionPartyMember:"",//是否市纪委委员
+        // ==================================
+        presentAddress: "", //现住址
+        phone: "", //联系电话
+        personalResume: "", //个人工作简历
+        rewardsAndPunishment: "", //奖惩情况
+        otherrelevantinformation: "" //其他相关情况
+      },
+      rules: {
+        name: [{ required: true, message: "请填写姓名", trigger: "blur" }],
+        // companyName: [{ required: true, message: "请选择单位名称", trigger: "blur" }],
+        // outOfficeinput: [{ required: true, message: "请填写工作单位", trigger: "blur" }],
+        presentOccupation: [
+          { required: true, message: "请填写现任职务", trigger: "blur" }
+        ],
+      },
+      //家庭成员
+      familyMembers: [
+        {
+          appellation: "", //称谓
+          name: "", //姓名
+          politicsStatus: "", //政治面貌
+          presentOccupation: "", //现任职务
+          companyName: "", //工作单位
+          age: "", //年龄
+          id: ""
+        }
+      ],
+      familyonj: {},
+      //个人及配偶、共同生活的子女拥有的房产情况
+      housingSituations: [
+        {
+          serialNumber: "",
+          roomNumber: "",
+          coveredArea: "",
+          purchasingDate: "",
+          purchasePrice: "",
+          propertyOwner: "",
+          location: "",
+          id: ""
+        }
+      ],
+      showinputcompanyName:true,
+      //表格高度
+      tableHeight: "50vh",
+      sexlist: [], //性别数组
+      politicallist: [], //政治面貌数组
+      degreelist: [], //学历数组
+      marriagelist: [], //婚姻数组
+      dutyRankList: [], //职务级别
+      Personneltype: [], //人员类型
+      isif: [], //是否选择下拉框
+      unitslist: [], //级联选择
+      zhichengjibie:[],//职称级别
+      workingStateList: [],//在职情况 新增
+      // 民族
+      nationalities: [
+        "汉族",
+        "蒙古族",
+        "回族",
+        "藏族",
+        "维吾尔族",
+        "苗族",
+        "彝族",
+        "壮族",
+        "布依族",
+        "朝鲜族",
+        "满族",
+        "侗族",
+        "瑶族",
+        "白族",
+        "土家族",
+        "哈尼族",
+        "哈萨克族",
+        "傣族",
+        "黎族",
+        "傈僳族",
+        "佤族",
+        "畲族",
+        "高山族",
+        "拉祜族",
+        "水族",
+        "东乡族",
+        "纳西族",
+        "景颇族",
+        "柯尔克孜族",
+        "土族",
+        "达斡尔族",
+        "仫佬族",
+        "羌族",
+        "布朗族",
+        "撒拉族",
+        "毛南族",
+        "仡佬族",
+        "锡伯族",
+        "阿昌族",
+        "普米族",
+        "塔吉克族",
+        "怒族",
+        "乌孜别克族",
+        "俄罗斯族",
+        "鄂温克族",
+        "德昂族",
+        "保安族",
+        "裕固族",
+        "京族",
+        "塔塔尔族",
+        "独龙族",
+        "鄂伦春族",
+        "赫哲族",
+        "门巴族",
+        "珞巴族",
+        "基诺族"
+      ]
+    };
+  },
+  created() {
+    document.title = "个人信息";
+    let that = this;
+    //在职情况 新增
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + 'web/dict',
+      data: {type:'working_state'},
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      transformRequest: [function (data) {
+        return qs.stringify(data)
+      }]
+    }).then(res=>{
+      if(res.data.success && res.data.errorCode == '-1'){
+        that.workingStateList = res.data.body.dictValueList
+      }else{
+        this.$message.error(res.data.msg);
+      }
+    })
+    //性别
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "sex" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.sexlist.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //政治面貌
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "politics_status" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.politicallist.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //学历
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "education_background" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.degreelist.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //婚姻
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "marital_status" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.marriagelist.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //职务级别
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "job_level" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.dutyRankList.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //人员类型
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "personne_icategory" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.Personneltype.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //是否是政协委员
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "yes_no" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.isif.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //职称级别
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "title_jobs_level" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.zhichengjibie.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+  },
+  mounted() {
+    // console.log(this.$route.query.isOutOffice)//判断是否为外部单位人员
+    //updatas 0-修改  2-新增     1-查看
+    this.disabled = this.$route.query.updatas == 1 ? true : false;
+    this.showinput = this.$route.query.updatas == 2||this.$route.query.updatas==0 ||this.$route.query.isOutOffice==0 ||this.$route.query.isOutOffice==1? false : true;
+    this.showinputcompanyName = this.$route.query.updatas == 2? false : true;
+    this.exportbtn = this.$route.query.updatas == 1? true : false
+    let id = this.$route.query.id; //参数id
+    if (id) {
+      let objs = {
+        userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+        id: id
+      };
+      this.init(objs);
+    }
+    this.initunits();
+    if(this.$route.query.isOutOffice == 1){ //如果是1输入框显示 else选择框显示
+      this.showOutOffice = true
+      // this.rules.outOfficeinput = [{ required: true, message: "请填写工作单位", trigger: "blur" }]
+    }else{
+      this.companyNameoff = true
+      // this.rules.companyName = true
+    }
+  },
+  methods: {
+    indexinfo(value) {
+      return value + 1 > 9 ? value + 1 : "0" + (value + 1);
+    },
+    // 家庭信息删除
+    deletebtn(indx,item){
+      console.log(item)
+      let objstr = {
+        id: item.id
+      }
+      this.$ajax({
+        method: "POST",
+        url: this.globals.requesturl + 'web/personnel/deleteFamily',
+        data: objstr,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.errorCode == "-1"){
+          this.$message.success(res.data.msg); 
+          location.reload()
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+    },
+    // 个人及配偶信息删除
+    personageDeletebtn(indx,item){
+      console.log(item)
+      let objstr = {
+        id: item.id
+      }
+      this.$ajax({
+        method: "POST",
+        url: this.globals.requesturl + 'web/personnel/deleteHouse',
+        data: objstr,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.errorCode == "-1"){
+          this.$message.success(res.data.msg); 
+          location.reload()
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+    },
+
+    //保存
+    savebtns(formName) {
+      let that = this;
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          let requestform = {
+            externalPersonnelUnit: that.form.outOfficeinput,
+            isOutOffice: this.$route.query.isOutOffice,
+            redBottomPhoto: that.redimg==""?that.redpicimg:that.redimg, //图片
+            name: that.form.name, //姓名
+            sex: that.form.sex, //性别
+            nation: that.form.nation, //民族
+            nativePlace: that.form.nativePlace, //籍贯
+            birthday: that.form.birthday, //生日
+            idCard: that.form.idCard, //身份证号
+            politicsStatus: that.form.politicsStatus, //政治面貌
+            educationBackground: that.form.educationBackground, //学历
+            maritalStatus: that.form.maritalStatus, //婚姻状况
+            partyTime: that.form.partyTime, //入党时间
+            workTime: that.form.workTime, //工作时间
+            // companyName: that.form.companyName,
+            "office.id":that.form.companyName? typeof(that.form.companyName)== 'string' ? that.form.companyNameid : that.form.companyName[that.form.companyName.length - 1]:"", //工作单位id
+            workingState: that.form.workingState, //在职情况
+            presentOccupation: that.form.presentOccupation, //现任职务
+            jobLevel: that.form.jobLevel, //职务级别
+            incumbentTime: that.form.incumbentTime, //现任职务时间
+            personnelcategory: that.form.personnelcategory, //人员类型
+            titleJobs: that.form.titleJobs, //职称
+            titleJobsLevel: that.form.titleJobsLevel, //职称级别
+            isCPPCCMemberOrNot: that.form.isCPPCCMemberOrNot, //是否是政协委员
+            isNPCDEputiesOrNot: that.form.isNPCDEputiesOrNot, //是否人大代表
+            isPartyRepresentativeOrNot: that.form.isPartyRepresentativeOrNot, //是否党代表
+            // ================================================================================
+            isCommunistPartyMember: that.form.isCommunistPartyMember, //是否市委委员
+            isCityCommissionPartyMember: that.form.isCityCommissionPartyMember, //是否市纪委委员
+            // ================================================================================
+            presentAddress: that.form.presentAddress, //现住址
+            phone: that.form.phone, //联系电话
+            personalResume: that.form.personalResume, //个人工作简历
+            rewardsAndPunishment: that.form.rewardsAndPunishment, //奖惩情况
+            otherrelevantinformation: that.form.otherrelevantinformation, //其他相关情况
+            id: that.form.id,
+            userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+            // familyMembers:that.familyMembers,
+            // housingSituations:that.housingSituations,
+            // familyMembers: JSON.stringify(that.familyMembers),
+            // housingSituations: JSON.stringify(that.housingSituations)
+          };
+          // console.log(that.form.companyNameid)
+          // console.log(requestform)
+          // console.log(that.showinputcompanyName)
+          // alert(that.form.companyName)
+          // alert(this.$route.query.isOutOffice)
+          if(this.$route.query.isOutOffice == 1 && !that.form.outOfficeinput){
+            console.log(111)
+            this.showOutOffice = true
+            this.$message.error("请填写工作单位");
+          }else if(this.$route.query.isOutOffice == 0 && !that.form.companyName){
+            console.log(22)
+            this.companyNameoff = true
+            this.$message.error("请选择工作单位");
+          }else{
+            console.log(that.form.companyName)
+          this.$ajax({
+            method: "POST",
+            url: that.globals.requesturl + "web/personnel/save",
+            data: requestform,
+            headers: { "Content-Type": "application/x-www-form-urlencoded"},
+            transformRequest: [
+              function(data) {
+                return qs.stringify(data);
+              }
+            ]
+            }).then(res => {
+              if (res.data.errorCode == "-1") {
+                // console.log(typeof(that.familyMembers)) //object
+                // let familyObj = that.familyMembers
+                // let isFamilyObj = Object.keys(familyObj)
+                // console.log(isFamilyObj.length == 0) //false
+                // if(isFamilyObj.length == 0){
+                //   isFamilyObj = JSON.stringify(that.familyMembers)
+                //   console.log(isFamilyObj)
+                //   console.log(typeof(isFamilyObj))
+                // }else {
+                //   isFamilyObj = []
+                //   console.log(isFamilyObj)
+                //   console.log(typeof(isFamilyObj))
+                // }
+                // console.log(that.familyMembers)
+                // let homeArr = []
+
+                // for(let i=0;i<that.familyMembers.length;i++){
+                //   let homeArr = that.familyMembers[0]
+                //   console.log(homeArr)
+                //   this.familyonj = homeArr
+                // }
+                let familyhousinlist = {
+                  familyMembers:JSON.stringify(that.familyMembers),
+                  // familyMembers:that.familyonj.appellation == "" && that.familyonj.name == "" && that.familyonj.politicsStatus == "" && that.familyonj.presentOccupation == "" && that.familyonj.companyName == "" && that.familyonj.age == "" && that.familyonj.id == "" ? "":JSON.stringify(that.familyMembers),
+                  // familyMembers: that.familyMembers.length == 0 ? [] : JSON.stringify(that.familyMembers) ,
+                  housingSituations: JSON.stringify(that.housingSituations),
+                  userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+                  personnelId:res.data.body.id
+                }
+                // let josnfoem = JSON.stringify(familyhousinlist)
+                this.$ajax({
+                  method: "POST",
+                  url: that.globals.requesturl + "web/personnel/saveList",
+                  data: familyhousinlist,
+                  headers: { "Content-Type": "application/x-www-form-urlencoded"},
+                  transformRequest: [
+                    function(data) {
+                      return qs.stringify(data);
+                    }
+                  ]
+                }).then(result => {
+                  if (res.data.errorCode == "-1") {
+                    this.$message.success(res.data.msg);
+                    this.$router.go(-1);
+                    // history.back()
+                  }else{
+                    this.$message.error(res.data.msg);
+                  }
+                })
+              } else {
+                this.$message.error(res.data.msg);
+              }
+            });
+          }
+        } else {
+          return false;
+        }
+      });
+    },
+    //添加个人及配偶、共同生活的子女拥有的房产情况   companyName.id
+    housingbtn() {
+      this.housingSituations.push({
+        roomNumber: "",
+        coveredArea: "",
+        purchasingDate: "",
+        purchasePrice: "",
+        propertyOwner: "",
+        location: "",
+        id: ""
+      });
+    },
+    //添加家庭成员
+    addfamily() {
+      this.familyMembers.push({
+        appellation: "", //称谓
+        name: "", //姓名
+        politicsStatus: "", //政治面貌
+        presentOccupation: "", //现任职务
+        companyName: "", //工作单位
+        age: "", //年龄
+        id: ""
+      });
+    },
+    // 查询单位
+    initunits() {
+      let that = this;
+      let objs = {
+        userId: JSON.parse(localStorage.getItem("userinfo")).isd
+      };
+      this.$ajax({
+        method: "POST",
+        url: that.globals.requesturl + "web/office/list",
+        data: objs,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        transformRequest: [
+          function(data) {
+            return qs.stringify(data);
+          }
+        ]
+      }).then(res => {
+        if (res.data.errorCode == "-1") {
+          let lists = [];
+          that.unitslist = res.data.body.officeList.map(function(list, index) {
+            return {
+              id: list.id,
+              name: list.name,
+              children: []
+            };
+          });
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    //级联事件
+    unitChanges(data) {
+      let that = this;
+      let objs = {
+        userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+        parentId: data[data.length - 1]
+      };
+      this.$ajax({
+        method: "POST",
+        url: that.globals.requesturl + "web/office/getChildren",
+        data: objs,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        transformRequest: [
+          function(data) {
+            return qs.stringify(data);
+          }
+        ]
+      }).then(res => {
+        if (res.data.errorCode == "-1") {
+          that.showinputcompanyName = false
+          if (data.length == 1) {
+            that.unitslist.map(function(list, index) {
+              if (list.id == data[0]) {
+                if (!list.children.length) {
+                  list.children = res.data.body.officeList.map(function(
+                    list,
+                    index
+                  ) {
+                    return {
+                      id: list.id,
+                      name: list.name,
+                      children: list.hasChildren == false ? "" : []
+                    };
+                  });
+                }
+              }
+            });
+          } else if (data.length == 2) {
+            that.unitslist.map(function(list, index) {
+              if (list.id == data[0]) {
+                list.children.map(function(list, index) {
+                  if (list.id == data[1]) {
+                    if (!list.children.length) {
+                      list.children = res.data.body.officeList.map(function(
+                        list,
+                        index
+                      ) {
+                        return {
+                          id: list.id,
+                          name: list.name,
+                          children: list.hasChildren == false ? "" : []
+                        };
+                      });
+                    }
+                  }
+                });
+              }
+            });
+          }else if(data.length == 3){
+            that.unitslist.map(function(list,index){
+              if(list.id == data[0]){
+                list.children.map(function(list,index){
+                  if(list.id == data[1]){
+                    list.children.map(function(list,index){
+                      if(list.id == data[2]){
+                        if(!list.children.length){
+                          list.children = res.data.body.officeList.map(function(list,index){
+                            return {
+                              id: list.id,
+                              name: list.name,
+                              children:list.hasChildren==false?"":[]
+                            }
+                          })
+                        }
+                      }
+                    })
+
+                  }
+                })
+              }
+            })
+          }
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    //初始化
+    init(objs) {
+      let that = this;
+      this.$ajax({
+        method: "POST",
+        url: that.globals.requesturl + "web/personnel/form",
+        data: objs,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        transformRequest: [
+          function(data) {
+            return qs.stringify(data);
+          }
+        ]
+      }).then(res => {
+        if (res.data.errorCode == "-1") {
+          that.redpicimg = res.data.body.personnel.redBottomPhoto
+          if(res.data.body.personnel.externalPersonnelUnit){
+            // console.log(res.data.body.personnel.externalPersonnelUnit)
+            this.showOutOffice = true
+            this.companyNameoff = false
+            this.form.outOfficeinput = res.data.body.personnel.externalPersonnelUnit
+          }else{
+            this.showOutOffice = false
+            this.companyNameoff = true
+            that.form.companyName = res.data.body.personnel.office?res.data.body.personnel.office.name: ""
+          }
+          that.form = {
+            redBottomPhoto:that.globals.requesturl + res.data.body.personnel.redBottomPhoto,
+            name: res.data.body.personnel.name,
+            sex: res.data.body.personnel.sex,
+            nativePlace: res.data.body.personnel.nativePlace,
+            educationBackground: res.data.body.personnel.educationBackground,
+            nation: res.data.body.personnel.nation,
+            maritalStatus: res.data.body.personnel.maritalStatus,
+            birthday: res.data.body.personnel.birthday,
+            idCard: res.data.body.personnel.idCard,
+            politicsStatus: res.data.body.personnel.politicsStatus,
+            partyTime: res.data.body.personnel.partyTime,
+            workTime: res.data.body.personnel.workTime,
+            outOfficeinput: that.form.outOfficeinput,
+            // companyName: res.data.body.personnel.office?res.data.body.personnel.office.name: "",
+            companyName:res.data.body.personnel.officeName,
+            companyNameid:res.data.body.personnel.office?res.data.body.personnel.office.id: "",
+            presentOccupation: res.data.body.personnel.presentOccupation,
+            jobLevel: res.data.body.personnel.jobLevel,
+            incumbentTime: res.data.body.personnel.incumbentTime,
+            personnelcategory: res.data.body.personnel.personnelcategory,
+            titleJobs: res.data.body.personnel.titleJobs,
+            titleJobsLevel: res.data.body.personnel.titleJobsLevel,
+            isCPPCCMemberOrNot: res.data.body.personnel.isCPPCCMemberOrNot,
+            isNPCDEputiesOrNot: res.data.body.personnel.isNPCDEputiesOrNot,
+            isPartyRepresentativeOrNot:res.data.body.personnel.isPartyRepresentativeOrNot,
+            // ================================================================================
+            isCommunistPartyMember: res.data.body.personnel.isCommunistPartyMember, //是否市委委员
+            isCityCommissionPartyMember: res.data.body.personnel.isCityCommissionPartyMember, //是否市纪委委员
+            workingState: res.data.body.personnel.workingState, //在职情况
+            // ================================================================================
+            presentAddress: res.data.body.personnel.presentAddress,
+            phone: res.data.body.personnel.phone,
+            personalResume: res.data.body.personnel.personalResume,
+            rewardsAndPunishment: res.data.body.personnel.rewardsAndPunishment,
+            otherrelevantinformation:
+            res.data.body.personnel.otherrelevantinformation,
+            id: res.data.body.personnel.id
+          };
+          if (res.data.body.familyMembers.length > 0) {
+            let familyarr = [];
+            res.data.body.familyMembers.map(function(list) {
+              familyarr.push({
+                id: list.id,
+                appellation: list.appellation,
+                name: list.name,
+                politicsStatus: list.politicsStatus,
+                presentOccupation: list.presentOccupation,
+                age: list.age,
+                companyName: list.officeName
+              });
+            });
+            that.familyMembers = familyarr;
+          }
+          if (res.data.body.housingSituations.length > 0) {
+            let housingSituations = [];
+            res.data.body.housingSituations.map(function(list) {
+              housingSituations.push({
+                id: list.id,
+                roomNumber: list.roomNumber,
+                coveredArea: list.coveredArea,
+                purchasingDate: list.purchasingDate,
+                purchasePrice: list.purchasePrice,
+                propertyOwner: list.propertyOwner,
+                location: list.location
+              });
+            });
+            that.housingSituations = housingSituations;
+          }
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    // 表格样式的处理
+    cellStyle({ row, column, rowIndex, columnIndex }) {
+      //基数偶数延时不同
+      if (rowIndex % 2 != 0) {
+        return {
+          "background-color": "#2162A8",
+          "text-align": "center",
+          color: "#fff",
+          "font-weight": "normal",
+          padding: "5px 0",
+          height: "60px"
+        };
+      } else {
+        return {
+          "background-color": "#02468F",
+          "text-align": "center",
+          color: "#fff",
+          "font-weight": "normal",
+          height: "60px",
+          padding: "5px 0"
+        };
+      }
+    },
+    headerCellStyle({ row, rowIndex }) {
+      return {
+        "background-color": "#027DBC",
+        "text-align": "center",
+        color: "#fff",
+        "font-weight": "normal",
+        height: "60px",
+        "font-size": "16px"
+      };
+    },
+    // 上传头像的钩子函数
+    handleAvatarSuccess(event) {
+      let that = this;
+      let files = event.target.files[0];
+      const reader = new FileReader();
+      reader.readAsDataURL(files);
+      reader.onload = function(e) {
+        that.form.redBottomPhoto = e.target.result;
+        let formdatas = new FormData();
+        formdatas.append('image',e.target.result)
+        that.$ajax({
+          method:"POST",
+          data:formdatas,
+          url: that.globals.requesturl + 'web/personnel/upload',
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          // transformRequest: [function (data) {
+          //   return qs.stringify(data)
+          // }]
+        }).then(res => {
+          if (res.data.success && res.data.errorCode == '-1'){
+            that.form.redBottomPhoto = that.globals.requesturl+res.data.body.url
+            that.redimg = res.data.body.url
+          }
+        }, (err) =>{
+          that.$message.error(`失败`);
+        })
+      };
+    },
+    beforeAvatarUpload(file) {
+      const isJPG = file.type === "image/jpeg";
+      const isLt2M = file.size / 1024 / 1024 < 2;
+
+      if (!isJPG) {
+        this.$message.error("上传头像图片只能是 JPG 格式!");
+      }
+      if (!isLt2M) {
+        this.$message.error("上传头像图片大小不能超过 2MB!");
+      }
+      return isJPG && isLt2M;
+    },
+    //导出人员信息
+    exportbtns(){
+      if(this.$route.query.id == ""){
+        this.$message.error("请选择需要导出的人员");
+      }else{
+        let obbjstr = {
+          ids:this.$route.query.id,
+          userId:JSON.parse(localStorage.getItem('userinfo')).isd,
+        }
+        console.log(obbjstr)
+        this.$ajax({
+          method: "POST",
+          url: this.globals.requesturl + 'web/personnel/export',
+          data: obbjstr,
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          transformRequest: [function (data) {
+            return qs.stringify(data)
+          }]
+        }).then(res=>{
+          if(res.data.errorCode == "-1"){
+            console.log(res.data)
+            let url = res.data.body.path
+            let link = document.createElement('a')
+            link.style.display = 'none'
+            link.href = url
+            link.setAttribute('download', '人员台账表')
+            document.body.appendChild(link)
+            link.click()
+            this.$message.success(res.data.msg);
+          }else{
+            this.$message.error(res.data.msg);
+          }
+        })
+      }
+    },
+    //返回上一页
+    goback() {
+      this.$router.go(-1);
+    }
+  },
+  watch: {}
+};
+</script>
+
+<style  lang="scss">
+.AddInfo {
+  width: 95%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  border: 1px solid #03D0FF;
+  box-shadow: 0 0 5px #03D0FF inset;
+  -webkit-box-shadow: 0 0 5px #03D0FF inset;
+  -moz-box-shadow: 0 0 5px #03D0FF inset;
+  -o-box-shadow: 0 0 0 5px #03D0FF inset;
+  position: relative;
+  color: #fff;
+textarea:-ms-input-placeholder {
+  color: #333;
+}
+
+textarea::-webkit-input-placeholder {
+  color: #333;
+}
+
+textarea::-moz-placeholder {
+  color: #333;
+}
+
+textarea:-moz-placeholder {
+  color: #333;
+}
+  .AddInfoMain {
+    width: 100%;
+    box-sizing: border-box;
+
+    .addInfoMainTop {
+      padding: 0 12px;
+      display: flex;
+      height: 70vh;
+
+      .AddInfoMainLeft {
+        border-right: 1px solid #03D0FF;
+        flex: 3;
+        padding: 0 10px;
+        box-sizing: border-box;
+        overflow: hidden;
+        overflow-y: scroll;
+      }
+
+      .AddInfoMainRight {
+        flex: 8;
+        overflow: hidden;
+        overflow-y: scroll;
+
+        .rightBlock {
+          border-bottom: 1px #03D0FF solid;
+          width: 100%;
+          padding: 10px 20px 15px;
+          box-sizing: border-box;
+          .el-input__inner{
+            height: 35px !important;
+          }
+          .rightTableFlex {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0 10px 0px;
+
+            .rightTableTitle {
+              flex: 1;
+
+              .rightTableMainTitle {
+                font-size: 16px;
+                line-height: 25px;
+              }
+
+              .rightTableSubTitle {
+                font-size: 14px;
+                color: #c0d0e2;
+              }
+            }
+
+            .rightTableBtn {
+              width: 80px;
+
+              .addTableRow {
+                width: 80px;
+                height: 35px;
+                line-height: 35px;
+                text-align: center;
+                font-size: 14px;
+                background: #025bff;
+                border: none;
+                border-radius: 3px;
+                color: #fff;
+                cursor: pointer;
+              }
+            }
+          }
+        }
+
+        .rightTextareaBlock {
+          border-bottom: 1px #03D0FF solid;
+          width: 100%;
+          padding: 0px 15px 15px;
+          box-sizing: border-box;
+
+          .rightTextareaTitle {
+            font-size: 16px;
+            line-height: 50px;
+          }
+        }
+      }
+    }
+
+    .addInfoMainBot {
+      width: 100%;
+      height: 10vh;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      border-top: 1px solid #03D0FF;
+      overflow: hidden;
+
+      .bottomSaveBtn {
+        border: none;
+        width: 80px;
+        height: 35px;
+        color: #ffffff;
+        border-radius: 3px;
+        line-height: 35px;
+        text-align: center;
+        background: #E08801;
+        float: right;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      // 新增导出按钮
+      .exportbtn {
+        float: right;
+        width: 80px;
+        background: #028FFF;
+        color: #fff;
+        border: none;
+        text-align: center;
+        font-size: 14px;
+        line-height: 35px;
+        height: 35px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    }
+  }
+  .el-form-item__label {
+    color: #ffffff;
+    width: 125px !important;
+  }
+    .el-form-item__content{
+        width: 185px !important;
+        margin-left: 125px !important;
+    }
+  .el-input__inner {
+    color: #fff;
+    background: transparent;
+    border: 1px solid rgba(3, 208, 255, 0.7);
+  }
+
+  input::placeholder {
+    color: #fff;
+  }
+
+  .el-button--primary {
+    color: #FFF;
+    background-color: #025BFF;
+    border-color: #025BFF;
+  }
+
+  .el-form {
+    margin-top: 15px;
+    width: 300px;
+
+    .el-form-item {
+      margin-bottom: 15px;
+    }
+  }
+
+  .el-progress__text {
+    color: #fff;
+    font-size: 12px !important;
+  }
+
+  .el-progress-bar__outer {
+    background: #b9b9b9;
+  }
+
+  .el-date-editor .el-range-input {
+    background: transparent;
+    color: #fff;
+  }
+
+  .el-date-editor .el-range-separator {
+    color: #FFF;
+  }
+
+  .el-textarea__inner {
+    background: #D9EBF3;
+  }
+
+  .el-textarea .el-textarea__inner {
+    resize: none;
+    color: #333;
+  }
+
+  .avatar-uploader .el-upload {
+    border: 1px dashed #03D0FF;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar-uploader .el-upload:hover {
+    border-color: #03D0FF;
+  }
+
+  .avatar-uploader-icon {
+    font-size: 20px;
+    color: #03D0FF;
+    width: 15.5vw;
+    height: 80px;
+    line-height: 80px;
+    text-align: center;
+  }
+  .avatar-uploader{
+    position: relative;
+    width: 100px;
+    height: 120px;
+  }
+  .avatar-uploader input{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;left: 0;
+    z-index: 100;
+    opacity: 0;
+  }
+  .avatar-uploader img{
+    width: 100%;
+    height: 100%;
+  }
+  .avatar {
+    width: 120px;
+    height: 80px;
+    display: block;
+  }
+
+  .el-radio {
+    color: #fff;
+  }
+
+  .el-date-editor.el-input, .el-date-editor.el-input__inner {
+    width: 100%;
+  }
+
+  .addressDetail {
+    .el-input__inner {
+      border-top: none;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+  }
+
+  .address {
+    .el-input__inner {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+  .el-input.is-disabled .el-input__inner{
+      background: transparent;
+  }
+}
+// **********************************************
+.el-breadcrumb__item > .el-breadcrumb__inner.is-link{
+  color: #fff;
+}
+.el-breadcrumb__item > .el-breadcrumb__inner.is-link:hover{
+  color: #fff;
+}
+.el-breadcrumb__item:last-child .el-breadcrumb__inner{
+  color: #59DCFB;
+}
+
+</style>

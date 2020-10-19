@@ -1,0 +1,265 @@
+<template>
+  <div class="public_floatleft homemain">
+    <div class="datebox">
+      <span class="border row1"></span>
+      <span class="border row2"></span>
+      <span class="border col1"></span>
+      <span class="border col2"></span>
+      <div class="public_floatright">
+        <!-- 选择年份 -->
+        <!-- <SelectYear @selectyear="oneselectyear" @selectmonth="oneselectmonth" /> -->
+        <span style="color:#fff;font-size:18px">请选择统计时间：</span>
+        <el-date-picker v-model="startDate" type="date" placeholder="请选择开始时间" format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
+        <el-date-picker v-model="endDate" type="date" placeholder="请选择结束时间" format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
+        <!-- <button type="primary"></button> -->
+        <el-button type="primary" @click="findbtn">查询</el-button>
+      </div>
+    </div>
+    <el-carousel :autoplay="false" arrow="always" :loop="false" direction="vertical" indicator-position='none'>
+      <!-- 第一页 -->
+      <el-carousel-item class="homemain_page">
+        <!-- ********************各单位党员统计******************** -->
+        <div class="homemain_page_item homemain_page_item1 homemain_page_item2">
+          <span class="border row1"></span>
+          <span class="border row2"></span>
+          <span class="border col1"></span>
+          <span class="border col2"></span>
+
+          <div class="homemain_page_item_header public_overflowr">
+            <img src="@/assets/home/statistics.png" alt class="public_floatleft" />
+            <div class="public_floatleft homemain_page_item_header_text">各单位党员人数统计</div>
+            <!-- <div class="public_floatright">
+              选择年份
+              <SelectYear @selectyear="oneselectyear" @selectmonth="oneselectmonth" />
+            </div> -->
+          </div>
+          <!-- echarts -->
+          <Gender :isDouble="true" :nameList="doubleNameList" :arrList="firstBlock" :datalist="datalist"/>
+        </div>
+
+        <!-- ********************4种形态统计******************** -->
+        <div class="homemain_page_item homemain_page_item1">
+          <span class="border row1"></span>
+          <span class="border row2"></span>
+          <span class="border col1"></span>
+          <span class="border col2"></span>
+          <div class="homemain_page_item_header public_overflowr">
+            <img src="@/assets/home/census.png" alt class="public_floatleft" />
+            <div class="public_floatleft homemain_page_item_header_text">4种形态统计</div>
+            <!-- <div class="public_floatright">
+              选择年份
+              <SelectYear  @selectyear="twoselectyear" @selectmonth="twoselectmonth"/>
+            </div> -->
+          </div>
+          <!-- echarts -->
+          <Shape :titlePre="secordBlockTitle" :dataPre="secordBlockData" />
+        </div>
+
+        <!-- *********************承担重点工作完成情况统计********************** -->
+        <div class="homemain_page_item homemain_page_item2">
+          <span class="border row1"></span>
+          <span class="border row2"></span>
+          <span class="border col1"></span>
+          <span class="border col2"></span>
+          <div class="homemain_page_item_header public_overflowr">
+            <img src="@/assets/home/schedule.png" alt class="public_floatleft" />
+            <div class="public_floatleft homemain_page_item_header_text">承担重点工作完成情况统计</div>
+            <!-- <div class="public_floatright">
+              选择年份
+              <SelectYear @selectyear="threeselectyear" @selectmonth="threeselectmonth" />
+            </div> -->
+          </div>
+          <!-- echarts -->
+          <Performance :threenames = "threenames" :threedata="threedata"/>
+        </div>
+
+        <!--*********************** 各单位问题人折线统计**************** -->
+        <!-- <div class="homemain_page_item">
+          <span class="border row1"></span>
+          <span class="border row2"></span>
+          <span class="border col1"></span>
+          <span class="border col2"></span>
+          <div class="homemain_page_item_header public_overflowr">
+            <img src="@/assets/home/foldline.png" alt class="public_floatleft" />
+            <div class="public_floatleft homemain_page_item_header_text">各单位问题人折线统计</div>
+          </div>
+          echarts
+          <ProblemPeople :dataLine="forthSeries" :dataXline="forthdataXline" />
+        </div> -->
+
+        <!-- *************************年龄结构层统计*********************** -->
+        <div class="homemain_page_item">
+          <span class="border row1"></span>
+          <span class="border row2"></span>
+          <span class="border col1"></span>
+          <span class="border col2"></span>
+          <div class="homemain_page_item_header public_overflowr">
+            <img src="@/assets/home/statistics.png" alt class="public_floatleft" />
+            <div class="public_floatleft homemain_page_item_header_text">年龄结构层统计</div>
+          </div>
+          <!-- echarts -->
+          <ProblemPeople :width="widthBlock" :dataLine="lastSeries" :dataXline="lastdataXline" />
+        </div>
+      </el-carousel-item>
+
+      <!-- 第二页 -->
+      <el-carousel-item class="homemain_page">
+        <!--******************** 监督台账问题种类统计***************** -->
+        <div class="homemain_page_item homemain_page_item1 homemain_page_item2">
+          <span class="border row1"></span>
+          <span class="border row2"></span>
+          <span class="border col1"></span>
+          <span class="border col2"></span>
+          <div class="homemain_page_item_header public_overflowr">
+            <img src="@/assets/home/statistics.png" alt class="public_floatleft" />
+            <div class="public_floatleft homemain_page_item_header_text">监督台账问题种类统计</div>
+            <!-- <div class="public_floatright">
+              选择年份
+              <SelectYear @selectyear="fiveselectyear" @selectmonth="fiveselectmonth" />
+            </div> -->
+          </div>
+          <!-- echarts -->
+          <Gender :isDouble="false" :nameList="nameList" :arrList="fifBlock"  :datalist="fifdatalist"/>
+        </div>
+
+        <!-- ******************4种处置意见统计******************** -->
+        <div class="homemain_page_item homemain_page_item1">
+          <span class="border row1"></span>
+          <span class="border row2"></span>
+          <span class="border col1"></span>
+          <span class="border col2"></span>
+          <div class="homemain_page_item_header public_overflowr">
+            <img src="@/assets/home/census.png" alt class="public_floatleft" />
+            <div class="public_floatleft homemain_page_item_header_text">4种处置方式统计</div>
+            <!-- <div class="public_floatright">
+              选择年份
+              <SelectYear @selectyear="sixselectyear" @selectmonth="sixselectmonth" />
+            </div> -->
+          </div>
+          <!-- echarts -->
+          <Shape :titlePre="sixthBlockTitle" :dataPre="sixthBlockData" />
+        </div>
+
+        <!-- *************************6大纪律统计********************** -->
+        <div class="homemain_page_item homemain_page_item2">
+          <span class="border row1"></span>
+          <span class="border row2"></span>
+          <span class="border col1"></span>
+          <span class="border col2"></span>
+          <div class="homemain_page_item_header public_overflowr">
+            <img src="@/assets/home/census.png" alt class="public_floatleft" />
+            <div class="public_floatleft homemain_page_item_header_text">6大纪律统计</div>
+            <!-- <div class="public_floatright">
+              选择年份
+              <SelectYear @selectyear="sevenselectyear" @selectmonth="sevenselectmonth"  />
+            </div> -->
+          </div>
+          <!-- echarts -->
+          <Shape :titlePre="seventhBlockTitle" :dataPre="seventhBlockData" />
+          <!-- <Shape :dataPre="seventhBlockData" /> -->
+        </div>
+        <!--***************** 各单位问题人年份统计******************* -->
+        <div class="homemain_page_item">
+          <span class="border row1"></span>
+          <span class="border row2"></span>
+          <span class="border col1"></span>
+          <span class="border col2"></span>
+          <div class="homemain_page_item_header public_overflowr">
+            <img src="@/assets/home/foldline.png" alt class="public_floatleft" />
+            <div class="public_floatleft homemain_page_item_header_text">各单位问题人年份统计</div>
+            <!-- <div class="public_floatright">
+              选择年份
+              <SelectYear @selectyear="eightselectyear" @selectmonth="eightselectmonth" />
+            </div> -->
+          </div>
+          <!-- echarts -->
+          <ProblemPeople :dataLine="eighthSeries" :dataXline="eighthdataXline" />
+        </div>
+      </el-carousel-item>
+
+      <!-- 第三页 -->
+      <el-carousel-item class="homemain_page" style="height:60%">
+        <!--*************************** 职级统计************************** -->
+        <div class="homemain_page_item homemain_page_item1 homemain_page_item2">
+          <span class="border row1"></span>
+          <span class="border row2"></span>
+          <span class="border col1"></span>
+          <span class="border col2"></span>
+          <div class="homemain_page_item_header public_overflowr">
+            <img src="@/assets/home/census.png" alt class="public_floatleft" />
+            <div class="public_floatleft homemain_page_item_header_text">职级统计</div>
+            <!-- <div class="public_floatright">
+              选择年份
+              <SelectYear @selectyear="nineselectyear" @selectmonth="nineselectmonth"/>
+            </div> -->
+          </div>
+          <!-- echarts -->
+          <FoldLine :dataBarFold="dataBarFold" :dataXbarFold="dataXbarFold" />
+        </div>
+
+        <!-- ******************机关人数统计******************** -->
+        <div class="homemain_page_item homemain_page_item1">
+          <span class="border row1"></span>
+          <span class="border row2"></span>
+          <span class="border col1"></span>
+          <span class="border col2"></span>
+          <div class="homemain_page_item_header public_overflowr">
+            <img src="@/assets/home/census.png" alt class="public_floatleft" />
+            <div class="public_floatleft homemain_page_item_header_text">机关人数统计</div>
+            <!-- <div class="public_floatright">
+              选择年份
+              <SelectYear @selectyear="tenselectyear" @selectmonth="tenselectmonth"/>
+            </div> -->
+          </div>
+          <!-- echarts -->
+          <Shape :titlePre="titlePreNoHollow" :dataPre="dataPreNoHollow" :isHollow="true" />
+        </div>
+
+        <!-- *************************年龄结构层统计*********************** -->
+        <!-- <div class="homemain_page_item homemain_page_item1" style="width:73.6vw">
+          <span class="border row1"></span>
+          <span class="border row2"></span>
+          <span class="border col1"></span>
+          <span class="border col2"></span>
+          <div class="homemain_page_item_header public_overflowr">
+            <img src="@/assets/home/statistics.png" alt class="public_floatleft" />
+            <div class="public_floatleft homemain_page_item_header_text">年龄结构层统计</div>
+          </div>
+          echarts
+          <ProblemPeople :width="widthBlock" :dataLine="lastSeries" :dataXline="lastdataXline" />
+        </div> -->
+      </el-carousel-item>
+    </el-carousel>
+  </div>
+</template>
+
+<script src='./script.js'></script>
+
+<style lang='scss' src='./style.scss'></style>
+
+<style lang="scss">
+.homemain{
+  .el-input__icon{
+    display: none;
+  }
+  .el-input--prefix .el-input__inner{
+    padding-left: 10px;
+  }
+  .el-date-editor.el-input, .el-date-editor.el-input__inner{
+    width:130px;
+  }
+  .el-input__inner{
+    border: 1px solid #03D0FF;
+    background: none;
+    color: #fff;
+    font-size: 11px;
+    height: 30px;
+    width: 120px;
+    text-align: center;
+  }
+  .el-button{
+    padding: 7px 15px;
+  }
+}
+
+</style>

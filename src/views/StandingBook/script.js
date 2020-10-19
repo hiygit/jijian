@@ -1,0 +1,1683 @@
+﻿import Navbar from '@/components/Navbar/index.vue'
+import qs from 'qs'
+export default {
+  name: 'StandingBook',
+  components: {
+    Navbar
+  },
+  data() {
+    return {
+      centerDialogVisible: false,//点击头像 显示个人信息
+      unittitles:"",//单位详情标题   updatas=1
+      remarks:"",//单位详情介绍
+      headpic:"",
+      messages:"",//初始化信息
+      info:true,//初始化
+      isfullscreen:false,//是否全屏显示
+      ifshowpop:false,//是否显示弹框
+      companydata: [],
+      //搜索
+      formInline:{
+        keywords:"",
+        user:""
+      },
+      ifnounits:false,//是否显示人员信息
+      iscol1:false,
+      iscol2:false,
+      iscol3:false,
+      iscol4:false,
+      iscol5:false,
+      issearch:false,//是否显示根据关键字和名字查询人员信息
+      issearchlist1:false,
+      issearchlist2:false,
+      //单位
+      units:[],
+      //部门
+      section:[],
+      // ======================
+      //岗位
+      workpost: [],
+      // ======================
+      //人员
+      staff:[],
+      //人员类别项
+      humanitem:[],
+      exportids:"",//
+      peopleid:"",//跳转人员详情id
+      // allunits:"",//单位数量
+      officeCount:"",//直属单位数量
+      orgCount:"",//内设机构数量
+      // ===========================================
+      // exportids: "",
+      redpicimg:"",//给后台传值
+      redimg:"",//不带域名的图片路径
+      // showinput: true, //工作单位查看时显示
+      disabled: false,
+      exportbtn:false,//导出按钮
+      labelWidth: "105px",
+      form: {
+        redBottomPhoto: "", //图片
+        name: "", //姓名
+        sex: "", //性别
+        nation: "", //民族
+        nativePlace: "", //籍贯
+        birthday: "", //生日
+        idCard: "", //身份证号
+        politicsStatus: "", //政治面貌
+        educationBackground: "", //学历
+        maritalStatus: "", //婚姻状况
+        partyTime: "", //入党时间
+        workTime: "", //工作时间
+        companyName: "",
+        companyNameid:"",
+        "office.name": "", //工作单位id
+        workingState: "",//在职情况  新增
+        presentOccupation: "", //现任职务
+        jobLevel: "", //职务级别
+        incumbentTime: "", //现任职务时间
+        personnelcategory: "", //人员类型
+        titleJobs: "", //职称
+        titleJobsLevel: "", //职称级别
+        isCPPCCMemberOrNot: "", //是否是政协委员
+        isNPCDEputiesOrNot: "", //是否人大代表
+        isPartyRepresentativeOrNot: "", //是否党代表
+        // ===========新增两个是否===========
+        isCommunistPartyMember:"",//是否市委委员
+        isCityCommissionPartyMember:"",//是否市纪委委员
+        // ==================================
+        presentAddress: "", //现住址
+        phone: "", //联系电话
+        personalResume: "", //个人工作简历
+        rewardsAndPunishment: "", //奖惩情况
+        otherrelevantinformation: "" //其他相关情况
+      },
+      rules: {
+        name: [{ required: true, message: "请填写姓名", trigger: "blur" }],
+        companyName: [{ required: true, message: "请选择单位名称", trigger: "blur" }],
+        presentOccupation: [
+          { required: true, message: "请填写现任职务", trigger: "blur" }
+        ],
+      },
+      //家庭成员
+      familyMembers: [
+        {
+          appellation: "", //称谓
+          name: "", //姓名
+          politicsStatus: "", //政治面貌
+          presentOccupation: "", //现任职务
+          companyName: "", //工作单位
+          age: "", //年龄
+          id: ""
+        }
+      ],
+      //个人及配偶、共同生活的子女拥有的房产情况
+      housingSituations: [
+        {
+          serialNumber: "",
+          roomNumber: "",
+          coveredArea: "",
+          purchasingDate: "",
+          purchasePrice: "",
+          propertyOwner: "",
+          location: "",
+          id: ""
+        }
+      ],
+      showinputcompanyName:true,
+      //表格高度
+      tableHeight: "50vh",
+      sexlist: [], //性别数组
+      politicallist: [], //政治面貌数组
+      degreelist: [], //学历数组
+      marriagelist: [], //婚姻数组
+      dutyRankList: [], //职务级别
+      Personneltype: [], //人员类型
+      isif: [], //是否选择下拉框
+      unitslist: [], //级联选择
+      zhichengjibie:[],//职称级别
+      workingStateList: [],//在职情况 新增
+      // 民族
+      nationalities: [
+        "汉族",
+        "蒙古族",
+        "回族",
+        "藏族",
+        "维吾尔族",
+        "苗族",
+        "彝族",
+        "壮族",
+        "布依族",
+        "朝鲜族",
+        "满族",
+        "侗族",
+        "瑶族",
+        "白族",
+        "土家族",
+        "哈尼族",
+        "哈萨克族",
+        "傣族",
+        "黎族",
+        "傈僳族",
+        "佤族",
+        "畲族",
+        "高山族",
+        "拉祜族",
+        "水族",
+        "东乡族",
+        "纳西族",
+        "景颇族",
+        "柯尔克孜族",
+        "土族",
+        "达斡尔族",
+        "仫佬族",
+        "羌族",
+        "布朗族",
+        "撒拉族",
+        "毛南族",
+        "仡佬族",
+        "锡伯族",
+        "阿昌族",
+        "普米族",
+        "塔吉克族",
+        "怒族",
+        "乌孜别克族",
+        "俄罗斯族",
+        "鄂温克族",
+        "德昂族",
+        "保安族",
+        "裕固族",
+        "京族",
+        "塔塔尔族",
+        "独龙族",
+        "鄂伦春族",
+        "赫哲族",
+        "门巴族",
+        "珞巴族",
+        "基诺族"
+      ]
+    }
+  },
+  created(){
+    document.title = "人员台账"
+
+    let that = this;
+    //在职情况 新增
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + 'web/dict',
+      data: {type:'working_state'},
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      transformRequest: [function (data) { 
+        return qs.stringify(data)
+      }]
+    }).then(res=>{
+      if(res.data.success && res.data.errorCode == '-1'){
+        that.workingStateList = res.data.body.dictValueList
+      }else{
+        this.$message.error(res.data.msg); 
+      }
+    })
+    //性别
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "sex" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.sexlist.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //政治面貌
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "politics_status" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.politicallist.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //学历
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "education_background" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.degreelist.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //婚姻
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "marital_status" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.marriagelist.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //职务级别
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "job_level" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.dutyRankList.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //人员类型
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "personne_icategory" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.Personneltype.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //是否是政协委员
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "yes_no" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.isif.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //职称级别
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "title_jobs_level" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        res.data.body.dictValueList.map(function(list) {
+          that.zhichengjibie.push({ value: list.value, label: list.label });
+        });
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+  },
+  mounted(){
+    this.init();
+    this.leftunit();
+    let allnum = {officeId:""}
+    this.allunitsfun(allnum)
+    this.initunits()
+  },
+  methods: {
+    // 家庭信息删除
+    deletebtn(indx,item){
+      console.log(item)
+      let objstr = {
+        id: item.id
+      }
+      console.log(objstr)
+      this.$ajax({
+        method: "POST",
+        url: this.globals.requesturl + 'web/personnel/deleteFamily',
+        data: objstr,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.errorCode == "-1"){
+          this.$message.success(res.data.msg); 
+          let objs = {
+            userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+            id: this.peopleid
+          };
+          let that = this;
+          this.$ajax({
+            method: "POST",
+            url: that.globals.requesturl + "web/personnel/form",
+            data: objs,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            transformRequest: [
+              function(data) {
+                return qs.stringify(data);
+              }
+            ]
+          }).then(res => {
+            if (res.data.errorCode == "-1") {
+              that.redpicimg = res.data.body.personnel.redBottomPhoto
+              that.form = {
+                redBottomPhoto:that.globals.requesturl + res.data.body.personnel.redBottomPhoto,
+                name: res.data.body.personnel.name,
+                sex: res.data.body.personnel.sex,
+                nativePlace: res.data.body.personnel.nativePlace,
+                educationBackground: res.data.body.personnel.educationBackground,
+                nation: res.data.body.personnel.nation,
+                maritalStatus: res.data.body.personnel.maritalStatus,
+                birthday: res.data.body.personnel.birthday,
+                idCard: res.data.body.personnel.idCard,
+                politicsStatus: res.data.body.personnel.politicsStatus,
+                partyTime: res.data.body.personnel.partyTime,
+                workTime: res.data.body.personnel.workTime,
+                // companyName: res.data.body.personnel.office?res.data.body.personnel.office.name: "",
+                companyName: res.data.body.personnel.officeName?res.data.body.personnel.officeName:"",
+                companyNameid:res.data.body.personnel.office?res.data.body.personnel.office.id: "",
+                presentOccupation: res.data.body.personnel.presentOccupation,
+                jobLevel: res.data.body.personnel.jobLevel,
+                incumbentTime: res.data.body.personnel.incumbentTime,
+                personnelcategory: res.data.body.personnel.personnelcategory,
+                titleJobs: res.data.body.personnel.titleJobs,
+                titleJobsLevel: res.data.body.personnel.titleJobsLevel,
+                isCPPCCMemberOrNot: res.data.body.personnel.isCPPCCMemberOrNot,
+                isNPCDEputiesOrNot: res.data.body.personnel.isNPCDEputiesOrNot,
+                isPartyRepresentativeOrNot:res.data.body.personnel.isPartyRepresentativeOrNot,
+                // ================================================================================
+                isCommunistPartyMember: res.data.body.personnel.isCommunistPartyMember, //是否市委委员
+                isCityCommissionPartyMember: res.data.body.personnel.isCityCommissionPartyMember, //是否市纪委委员
+                workingState: res.data.body.personnel.workingState, //在职情况
+                // ================================================================================
+                presentAddress: res.data.body.personnel.presentAddress,
+                phone: res.data.body.personnel.phone,
+                personalResume: res.data.body.personnel.personalResume,
+                rewardsAndPunishment: res.data.body.personnel.rewardsAndPunishment,
+                otherrelevantinformation:
+                res.data.body.personnel.otherrelevantinformation,
+                id: res.data.body.personnel.id
+              };
+              console.log(res.data.body.familyMembers.length)
+              if (res.data.body.familyMembers.length > 0) {
+                let familyarr = [];
+                res.data.body.familyMembers.map(function(list) {
+                  familyarr.push({
+                    id: list.id,
+                    appellation: list.appellation,
+                    name: list.name,
+                    politicsStatus: list.politicsStatus,
+                    presentOccupation: list.presentOccupation,
+                    age: list.age,
+                    companyName: list.officeName
+                  });
+                });
+                that.familyMembers = familyarr;
+              }else if (res.data.body.familyMembers.length <= 0) {
+                let familyarr = [];
+                res.data.body.familyMembers.map(function(list) {
+                  familyarr.push({
+                    id: list.id,
+                    appellation: list.appellation,
+                    name: list.name,
+                    politicsStatus: list.politicsStatus,
+                    presentOccupation: list.presentOccupation,
+                    age: list.age,
+                    companyName: list.officeName
+                  });
+                });
+                that.familyMembers = familyarr;
+              }
+    
+              if (res.data.body.housingSituations.length > 0) {
+                let housingSituations = [];
+                res.data.body.housingSituations.map(function(list) {
+                  housingSituations.push({
+                    id: list.id,
+                    roomNumber: list.roomNumber,
+                    coveredArea: list.coveredArea,
+                    purchasingDate: list.purchasingDate,
+                    purchasePrice: list.purchasePrice,
+                    propertyOwner: list.propertyOwner,
+                    location: list.location
+                  });
+                });
+                that.housingSituations = housingSituations;
+              }else if (res.data.body.housingSituations.length <= 0) {
+                let housingSituations = [];
+                res.data.body.housingSituations.map(function(list) {
+                  housingSituations.push({
+                    id: list.id,
+                    roomNumber: list.roomNumber,
+                    coveredArea: list.coveredArea,
+                    purchasingDate: list.purchasingDate,
+                    purchasePrice: list.purchasePrice,
+                    propertyOwner: list.propertyOwner,
+                    location: list.location
+                  });
+                });
+                that.housingSituations = housingSituations;
+              }
+            } else {
+              this.$message.error(res.data.msg);
+            }
+          });
+          // location.reload()
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+    },
+    // 个人及配偶信息删除
+    personageDeletebtn(indx,item){
+      console.log(item)
+      let objstr = {
+        id: item.id
+      }
+      console.log(objstr)
+      this.$ajax({
+        method: "POST",
+        url: this.globals.requesturl + 'web/personnel/deleteHouse',
+        data: objstr,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.errorCode == "-1"){
+          this.$message.success(res.data.msg); 
+          let objs = {
+            userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+            id: this.peopleid
+          };
+          let that = this;
+          this.$ajax({
+            method: "POST",
+            url: that.globals.requesturl + "web/personnel/form",
+            data: objs,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            transformRequest: [
+              function(data) {
+                return qs.stringify(data);
+              }
+            ]
+          }).then(res => {
+            if (res.data.errorCode == "-1") {
+              that.redpicimg = res.data.body.personnel.redBottomPhoto
+              that.form = {
+                redBottomPhoto:that.globals.requesturl + res.data.body.personnel.redBottomPhoto,
+                name: res.data.body.personnel.name,
+                sex: res.data.body.personnel.sex,
+                nativePlace: res.data.body.personnel.nativePlace,
+                educationBackground: res.data.body.personnel.educationBackground,
+                nation: res.data.body.personnel.nation,
+                maritalStatus: res.data.body.personnel.maritalStatus,
+                birthday: res.data.body.personnel.birthday,
+                idCard: res.data.body.personnel.idCard,
+                politicsStatus: res.data.body.personnel.politicsStatus,
+                partyTime: res.data.body.personnel.partyTime,
+                workTime: res.data.body.personnel.workTime,
+                // companyName: res.data.body.personnel.office?res.data.body.personnel.office.name: "",
+                companyName: res.data.body.personnel.officeName?res.data.body.personnel.officeName:"",
+                companyNameid:res.data.body.personnel.office?res.data.body.personnel.office.id: "",
+                presentOccupation: res.data.body.personnel.presentOccupation,
+                jobLevel: res.data.body.personnel.jobLevel,
+                incumbentTime: res.data.body.personnel.incumbentTime,
+                personnelcategory: res.data.body.personnel.personnelcategory,
+                titleJobs: res.data.body.personnel.titleJobs,
+                titleJobsLevel: res.data.body.personnel.titleJobsLevel,
+                isCPPCCMemberOrNot: res.data.body.personnel.isCPPCCMemberOrNot,
+                isNPCDEputiesOrNot: res.data.body.personnel.isNPCDEputiesOrNot,
+                isPartyRepresentativeOrNot:res.data.body.personnel.isPartyRepresentativeOrNot,
+                // ================================================================================
+                isCommunistPartyMember: res.data.body.personnel.isCommunistPartyMember, //是否市委委员
+                isCityCommissionPartyMember: res.data.body.personnel.isCityCommissionPartyMember, //是否市纪委委员
+                workingState: res.data.body.personnel.workingState, //在职情况
+                // ================================================================================
+                presentAddress: res.data.body.personnel.presentAddress,
+                phone: res.data.body.personnel.phone,
+                personalResume: res.data.body.personnel.personalResume,
+                rewardsAndPunishment: res.data.body.personnel.rewardsAndPunishment,
+                otherrelevantinformation:
+                res.data.body.personnel.otherrelevantinformation,
+                id: res.data.body.personnel.id
+              };
+              console.log(res.data.body.familyMembers.length)
+              if (res.data.body.familyMembers.length > 0) {
+                let familyarr = [];
+                res.data.body.familyMembers.map(function(list) {
+                  familyarr.push({
+                    id: list.id,
+                    appellation: list.appellation,
+                    name: list.name,
+                    politicsStatus: list.politicsStatus,
+                    presentOccupation: list.presentOccupation,
+                    age: list.age,
+                    companyName: list.officeName
+                  });
+                });
+                that.familyMembers = familyarr;
+              }else if (res.data.body.familyMembers.length <= 0) {
+                let familyarr = [];
+                res.data.body.familyMembers.map(function(list) {
+                  familyarr.push({
+                    id: list.id,
+                    appellation: list.appellation,
+                    name: list.name,
+                    politicsStatus: list.politicsStatus,
+                    presentOccupation: list.presentOccupation,
+                    age: list.age,
+                    companyName: list.officeName
+                  });
+                });
+                that.familyMembers = familyarr;
+              }
+    
+              if (res.data.body.housingSituations.length > 0) {
+                let housingSituations = [];
+                res.data.body.housingSituations.map(function(list) {
+                  housingSituations.push({
+                    id: list.id,
+                    roomNumber: list.roomNumber,
+                    coveredArea: list.coveredArea,
+                    purchasingDate: list.purchasingDate,
+                    purchasePrice: list.purchasePrice,
+                    propertyOwner: list.propertyOwner,
+                    location: list.location
+                  });
+                });
+                that.housingSituations = housingSituations;
+              }else if (res.data.body.housingSituations.length <= 0) {
+                let housingSituations = [];
+                res.data.body.housingSituations.map(function(list) {
+                  housingSituations.push({
+                    id: list.id,
+                    roomNumber: list.roomNumber,
+                    coveredArea: list.coveredArea,
+                    purchasingDate: list.purchasingDate,
+                    purchasePrice: list.purchasePrice,
+                    propertyOwner: list.propertyOwner,
+                    location: list.location
+                  });
+                });
+                that.housingSituations = housingSituations;
+              }
+            } else {
+              this.$message.error(res.data.msg);
+            }
+          });
+          // location.reload()
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+    },
+
+    //添加个人及配偶、共同生活的子女拥有的房产情况   companyName.id
+    housingbtn() {
+      this.housingSituations.push({
+        roomNumber: "",
+        coveredArea: "",
+        purchasingDate: "",
+        purchasePrice: "",
+        propertyOwner: "",
+        location: "",
+        id: ""
+      });
+    },
+    //添加家庭成员
+    addfamily() {
+      this.familyMembers.push({
+        appellation: "", //称谓
+        name: "", //姓名
+        politicsStatus: "", //政治面貌
+        presentOccupation: "", //现任职务
+        companyName: "", //工作单位
+        age: "", //年龄
+        id: ""
+      });
+    },
+    // 上传头像的钩子函数
+    handleAvatarSuccess(event) {
+      let that = this;
+      let files = event.target.files[0];
+      const reader = new FileReader();
+      reader.readAsDataURL(files);
+      reader.onload = function(e) {
+        that.form.redBottomPhoto = e.target.result;
+        let formdatas = new FormData();
+        formdatas.append('image',e.target.result)
+        that.$ajax({
+          method:"POST",
+          data:formdatas,
+          url: that.globals.requesturl + 'web/personnel/upload',
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          // transformRequest: [function (data) {
+          //   return qs.stringify(data)
+          // }]
+        }).then(res => {
+          if (res.data.success && res.data.errorCode == '-1'){
+            that.form.redBottomPhoto = that.globals.requesturl+res.data.body.url
+            that.redimg = res.data.body.url
+          }
+        }, (err) =>{
+          that.$message.error(`失败`);
+        })
+      };
+    },
+    beforeAvatarUpload(file) {
+      const isJPG = file.type === "image/jpeg";
+      const isLt2M = file.size / 1024 / 1024 < 2;
+
+      if (!isJPG) {
+        this.$message.error("上传头像图片只能是 JPG 格式!");
+      }
+      if (!isLt2M) {
+        this.$message.error("上传头像图片大小不能超过 2MB!");
+      }
+      return isJPG && isLt2M;
+    },
+
+    //查看人员详情
+    detailspeople(){
+      console.log(this.peopleid)
+      // this.$router.push({path:"/addInfo",query:{updatas:1,id:this.peopleid}})
+      this.centerDialogVisible = true
+      let objs = {
+        userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+        id: this.peopleid
+      };
+      let that = this;
+      this.$ajax({
+        method: "POST",
+        url: that.globals.requesturl + "web/personnel/form",
+        data: objs,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        transformRequest: [
+          function(data) {
+            return qs.stringify(data);
+          }
+        ]
+      }).then(res => {
+        if (res.data.errorCode == "-1") {
+          that.redpicimg = res.data.body.personnel.redBottomPhoto
+          that.form = {
+            redBottomPhoto:that.globals.requesturl + res.data.body.personnel.redBottomPhoto,
+            name: res.data.body.personnel.name,
+            sex: res.data.body.personnel.sex,
+            nativePlace: res.data.body.personnel.nativePlace,
+            educationBackground: res.data.body.personnel.educationBackground,
+            nation: res.data.body.personnel.nation,
+            maritalStatus: res.data.body.personnel.maritalStatus,
+            birthday: res.data.body.personnel.birthday,
+            idCard: res.data.body.personnel.idCard,
+            politicsStatus: res.data.body.personnel.politicsStatus,
+            partyTime: res.data.body.personnel.partyTime,
+            workTime: res.data.body.personnel.workTime,
+            // companyName: res.data.body.personnel.office?res.data.body.personnel.office.name: "",
+            companyName: res.data.body.personnel.officeName?res.data.body.personnel.officeName:"",
+            companyNameid:res.data.body.personnel.office?res.data.body.personnel.office.id: "",
+            presentOccupation: res.data.body.personnel.presentOccupation,
+            jobLevel: res.data.body.personnel.jobLevel,
+            incumbentTime: res.data.body.personnel.incumbentTime,
+            personnelcategory: res.data.body.personnel.personnelcategory,
+            titleJobs: res.data.body.personnel.titleJobs,
+            titleJobsLevel: res.data.body.personnel.titleJobsLevel,
+            isCPPCCMemberOrNot: res.data.body.personnel.isCPPCCMemberOrNot,
+            isNPCDEputiesOrNot: res.data.body.personnel.isNPCDEputiesOrNot,
+            isPartyRepresentativeOrNot:res.data.body.personnel.isPartyRepresentativeOrNot,
+            // ================================================================================
+            isCommunistPartyMember: res.data.body.personnel.isCommunistPartyMember, //是否市委委员
+            isCityCommissionPartyMember: res.data.body.personnel.isCityCommissionPartyMember, //是否市纪委委员
+            workingState: res.data.body.personnel.workingState, //在职情况
+            // ================================================================================
+            presentAddress: res.data.body.personnel.presentAddress,
+            phone: res.data.body.personnel.phone,
+            personalResume: res.data.body.personnel.personalResume,
+            rewardsAndPunishment: res.data.body.personnel.rewardsAndPunishment,
+            otherrelevantinformation:
+            res.data.body.personnel.otherrelevantinformation,
+            id: res.data.body.personnel.id
+          };
+          console.log(res.data.body.familyMembers.length)
+          if (res.data.body.familyMembers.length > 0) {
+            let familyarr = [];
+            res.data.body.familyMembers.map(function(list) {
+              familyarr.push({
+                id: list.id,
+                appellation: list.appellation,
+                name: list.name,
+                politicsStatus: list.politicsStatus,
+                presentOccupation: list.presentOccupation,
+                age: list.age,
+                companyName: list.officeName
+              });
+            });
+            that.familyMembers = familyarr;
+          }else if (res.data.body.familyMembers.length <= 0) {
+            let familyarr = [];
+            res.data.body.familyMembers.map(function(list) {
+              familyarr.push({
+                id: list.id,
+                appellation: list.appellation,
+                name: list.name,
+                politicsStatus: list.politicsStatus,
+                presentOccupation: list.presentOccupation,
+                age: list.age,
+                companyName: list.officeName
+              });
+            });
+            that.familyMembers = familyarr;
+          }
+
+          if (res.data.body.housingSituations.length > 0) {
+            let housingSituations = [];
+            res.data.body.housingSituations.map(function(list) {
+              housingSituations.push({
+                id: list.id,
+                roomNumber: list.roomNumber,
+                coveredArea: list.coveredArea,
+                purchasingDate: list.purchasingDate,
+                purchasePrice: list.purchasePrice,
+                propertyOwner: list.propertyOwner,
+                location: list.location
+              });
+            });
+            that.housingSituations = housingSituations;
+          }else if (res.data.body.housingSituations.length <= 0) {
+            let housingSituations = [];
+            res.data.body.housingSituations.map(function(list) {
+              housingSituations.push({
+                id: list.id,
+                roomNumber: list.roomNumber,
+                coveredArea: list.coveredArea,
+                purchasingDate: list.purchasingDate,
+                purchasePrice: list.purchasePrice,
+                propertyOwner: list.propertyOwner,
+                location: list.location
+              });
+            });
+            that.housingSituations = housingSituations;
+          }
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    //保存
+    savebtns(formName) {
+      let that = this;
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          let requestform = {
+            externalPersonnelUnit: that.form.outOfficeinput,
+            isOutOffice: this.$route.query.isOutOffice,
+            redBottomPhoto: that.redimg==""?that.redpicimg:that.redimg, //图片
+            name: that.form.name, //姓名
+            sex: that.form.sex, //性别
+            nation: that.form.nation, //民族
+            nativePlace: that.form.nativePlace, //籍贯
+            birthday: that.form.birthday, //生日
+            idCard: that.form.idCard, //身份证号
+            politicsStatus: that.form.politicsStatus, //政治面貌
+            educationBackground: that.form.educationBackground, //学历
+            maritalStatus: that.form.maritalStatus, //婚姻状况
+            partyTime: that.form.partyTime, //入党时间
+            workTime: that.form.workTime, //工作时间
+            // companyName: that.form.companyName,
+            "office.id":that.form.companyName? typeof(that.form.companyName)== 'string' ? that.form.companyNameid : that.form.companyName[that.form.companyName.length - 1]:"", //工作单位id
+            workingState: that.form.workingState, //在职情况
+            presentOccupation: that.form.presentOccupation, //现任职务
+            jobLevel: that.form.jobLevel, //职务级别
+            incumbentTime: that.form.incumbentTime, //现任职务时间
+            personnelcategory: that.form.personnelcategory, //人员类型
+            titleJobs: that.form.titleJobs, //职称
+            titleJobsLevel: that.form.titleJobsLevel, //职称级别
+            isCPPCCMemberOrNot: that.form.isCPPCCMemberOrNot, //是否是政协委员
+            isNPCDEputiesOrNot: that.form.isNPCDEputiesOrNot, //是否人大代表
+            isPartyRepresentativeOrNot: that.form.isPartyRepresentativeOrNot, //是否党代表
+            // ================================================================================
+            isCommunistPartyMember: that.form.isCommunistPartyMember, //是否市委委员
+            isCityCommissionPartyMember: that.form.isCityCommissionPartyMember, //是否市纪委委员
+            // ================================================================================
+            presentAddress: that.form.presentAddress, //现住址
+            phone: that.form.phone, //联系电话
+            personalResume: that.form.personalResume, //个人工作简历
+            rewardsAndPunishment: that.form.rewardsAndPunishment, //奖惩情况
+            otherrelevantinformation: that.form.otherrelevantinformation, //其他相关情况
+            id: that.form.id,
+            userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+            // familyMembers:that.familyMembers,
+            // housingSituations:that.housingSituations,
+            // familyMembers: JSON.stringify(that.familyMembers),
+            // housingSituations: JSON.stringify(that.housingSituations)
+          };
+          // console.log(that.form.companyNameid)
+          // console.log(requestform)
+          // console.log(that.showinputcompanyName)
+          // alert(that.form.companyName)
+          // alert(this.$route.query.isOutOffice)
+          if(this.$route.query.isOutOffice == 1 && !that.form.outOfficeinput){
+            console.log(111)
+            this.showOutOffice = true
+            this.$message.error("请填写工作单位");
+          }else if(this.$route.query.isOutOffice == 0 && !that.form.companyName){
+            console.log(22)
+            this.companyNameoff = true
+            this.$message.error("请选择工作单位");
+          }else{
+            console.log(that.form.companyName)
+          this.$ajax({
+            method: "POST",
+            url: that.globals.requesturl + "web/personnel/save",
+            data: requestform,
+            headers: { "Content-Type": "application/x-www-form-urlencoded"},
+            transformRequest: [
+              function(data) {
+                return qs.stringify(data);
+              }
+            ]
+            }).then(res => {
+              if (res.data.errorCode == "-1") {
+                // console.log(typeof(that.familyMembers)) //object
+                // let familyObj = that.familyMembers
+                // let isFamilyObj = Object.keys(familyObj)
+                // console.log(isFamilyObj.length == 0) //false
+                // if(isFamilyObj.length == 0){
+                //   isFamilyObj = JSON.stringify(that.familyMembers)
+                //   console.log(isFamilyObj)
+                //   console.log(typeof(isFamilyObj))
+                // }else {
+                //   isFamilyObj = []
+                //   console.log(isFamilyObj)
+                //   console.log(typeof(isFamilyObj))
+                // }
+                // console.log(that.familyMembers)
+                // let homeArr = []
+
+                // for(let i=0;i<that.familyMembers.length;i++){
+                //   let homeArr = that.familyMembers[0]
+                //   console.log(homeArr)
+                //   this.familyonj = homeArr
+                // }
+                let familyhousinlist = {
+                  familyMembers:JSON.stringify(that.familyMembers),
+                  // familyMembers:that.familyonj.appellation == "" && that.familyonj.name == "" && that.familyonj.politicsStatus == "" && that.familyonj.presentOccupation == "" && that.familyonj.companyName == "" && that.familyonj.age == "" && that.familyonj.id == "" ? "":JSON.stringify(that.familyMembers),
+                  // familyMembers: that.familyMembers.length == 0 ? [] : JSON.stringify(that.familyMembers) ,
+                  housingSituations: JSON.stringify(that.housingSituations),
+                  userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+                  personnelId:res.data.body.id
+                }
+                // let josnfoem = JSON.stringify(familyhousinlist)
+                this.$ajax({
+                  method: "POST",
+                  url: that.globals.requesturl + "web/personnel/saveList",
+                  data: familyhousinlist,
+                  headers: { "Content-Type": "application/x-www-form-urlencoded"},
+                  transformRequest: [
+                    function(data) {
+                      return qs.stringify(data);
+                    }
+                  ]
+                }).then(result => {
+                  if (res.data.errorCode == "-1") {
+                    this.$message.success(res.data.msg);
+                    this.centerDialogVisible = false
+                    // this.$router.push({ path: '/standingBook' })
+                    // location.reload()
+                    // this.$router.go(-1);
+                    // history.back()
+                  }else{
+                    this.$message.error(res.data.msg);
+                  }
+                })
+              } else {
+                this.$message.error(res.data.msg);
+              }
+            });
+          }
+        } else {
+          return false;
+        }
+      });
+    },
+
+    //初始化
+    init(){
+      let that = this; 
+      let objs = {
+        userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+        officeId:""
+      } 
+      this.$ajax({
+        method: "POST",
+        url: that.globals.requesturl + 'web/personnel/index',
+        data: objs,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.errorCode == "-1"){
+          that.messages = res.data.msg
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+    },
+    //获取左边单位
+    leftunit(){
+      let that = this; 
+      let objs = {
+        userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+      } 
+      this.$ajax({
+        method: "POST",
+        url: this.globals.requesturl + 'web/office/list',
+        data: objs,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.errorCode == "-1"){
+          res.data.body.officeList.map(function(list){
+            list.checkedstate = false
+          })
+          that.companydata = res.data.body.officeList
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+    },
+    // 选择单位
+    selectitem(dex){
+      this.companydata.map(function(list){
+        list.checkedstate = false
+      })
+      this.companydata[dex].checkedstate = true
+      this.info = false
+      this.ifnounits = true
+      this.iscol1 = true
+      this.iscol2 = false
+      this.iscol3 = false
+      this.iscol4 = false
+      this.iscol5 = false
+      this.issearch = false
+      this.issearchlist1 = false
+      this.issearchlist2 = false
+      let requestobj = {
+        userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+        officeId:this.companydata[dex].id
+      }
+      this.$ajax({
+        method: "POST",
+        url: this.globals.requesturl + 'web/personnel/index',
+        data: requestobj,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.errorCode == "-1"){
+          res.data.body.offices.map(function(list){
+            list.checkedstate = false
+          })
+          this.units = res.data.body.offices
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+      let allnum = {officeId:this.companydata[dex].id}
+      this.allunitsfun(allnum)
+    },
+    //机关
+    selunits(dex){
+      this.units.map(function(list){
+        list.checkedstate = false
+      })
+      this.units[dex].checkedstate = true
+      if(this.units[dex].hasChildren){
+        this.iscol2 = true
+        this.iscol3 = false
+      }else{
+        this.iscol2 = false
+        this.iscol3 = true
+      }
+      this.iscol4 = false
+      this.iscol5 = false
+      let requestobj = {
+        userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+        officeId:this.units[dex].id
+      }
+      this.$ajax({
+        method: "POST",
+        url: this.globals.requesturl + 'web/personnel/index',
+        data: requestobj,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.errorCode == "-1"){
+          if(this.units[dex].hasChildren){
+            res.data.body.offices.map(function(list){
+              list.checkedstate = false
+            })
+            this.section = res.data.body.offices
+          }else{
+            res.data.body.personnels.map(function(list){
+              list.checkedstate = false
+            })
+            this.staff = res.data.body.personnels
+          }
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+    },
+    //部门
+    selsection(dex){
+      this.section.map(function(list){
+        list.checkedstate = false
+      })
+      this.section[dex].checkedstate = true
+      if(this.section[dex].hasChildren){
+        this.iscol3 = true
+        this.iscol4 = false
+        this.iscol5 = false
+      }else{
+        this.iscol4 = false
+        this.iscol3 = true
+        this.iscol5 = false
+      }
+      
+      // this.iscol3 = true
+      // this.iscol4 = false
+      let requestobj = {
+        userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+        officeId:this.section[dex].id
+      }
+      this.$ajax({
+        method: "POST",
+        url: this.globals.requesturl + 'web/personnel/index',
+        data: requestobj,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.errorCode == "-1"){
+          if(this.section[dex].hasChildren){
+
+            res.data.body.offices.map(function(list){
+              list.checkedstate = false
+            })
+            this.workpost = res.data.body.offices
+          }else{
+            res.data.body.personnels.map(function(list){
+              list.checkedstate = false
+            })
+            this.staff = res.data.body.personnels
+          }
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+    },
+    // ==================================================
+    // 岗位
+    working(dex){
+      this.workpost.map(function(list){
+        list.checkedstate = false
+      })
+      this.workpost[dex].checkedstate = true
+      this.iscol3 = true
+      this.iscol4 = true
+      this.iscol5 = false
+      let requestobj = {
+        userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+        officeId:this.workpost[dex].id
+      }
+      this.$ajax({
+        method: "POST",
+        url: this.globals.requesturl + 'web/personnel/index',
+        data: requestobj,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.errorCode == "-1"){
+          if(this.workpost[dex].hasChildren){
+
+            // res.data.body.offices.map(function(list){
+            //   list.checkedstate = false
+            // })
+            // this.workpost = res.data.body.offices
+
+          }else{
+            res.data.body.personnels.map(function(list){
+              list.checkedstate = false
+            })
+            this.staff = res.data.body.personnels
+          }
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+    },
+    // ==================================================
+    //人员
+    selstaff(dex,items){
+      this.peopleid = items.id
+      this.searchprople(items.id)
+      this.staff.map(function(list){
+        list.checkedstate = false
+      })
+      this.headpic = this.globals.requesturl+items.redBottomPhoto
+      this.staff[dex].checkedstate = true
+      this.iscol5 = true
+    },
+    //长按事件
+    showDeleteButton(id){
+      let that = this
+      let querstobj = {
+        userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+        id:id
+      }
+      this.$ajax({
+        method:"POST",
+        data:querstobj,
+        url: this.globals.requesturl + 'web/office/getRemarks',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.success && res.data.errorCode == -1){
+          // console.log(res.data)
+          that.unittitles = res.data.body.title
+          // let str = res.data.body.remarks.replace(/\n/g,"<br/>")
+          that.remarks = res.data.body.content.replace(/\n/g,"<br/>")
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+
+      this.ifshowpop = true
+    },
+    // 页面跳转
+    goLink(e){
+    //   this.$router.push({path:e})
+    },
+    //关闭弹框
+    closepop(){
+      this.ifshowpop = false
+      this.isfullscreen = false  
+    },
+    // 遮罩层的关闭按钮
+    handleClose(done) {
+      // location.reload()
+      this.centerDialogVisible = false
+    },
+
+
+
+    //查询按钮
+    searchbtn(){
+      let querstobj = {
+        userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+        keyword:this.formInline.keywords,
+        name:this.formInline.user
+      }
+      this.$ajax({
+        method:"POST",
+        data:querstobj,
+        url: this.globals.requesturl + 'web/personnel/solrSelect',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.success && res.data.errorCode == -1){
+          let listarr = [];
+          for(let i=0;i<res.data.body.list.length;i++){
+            if(res.data.body.list[i].personnelList.length > 0){
+              for(let j=0;j<res.data.body.list[i].personnelList.length;j++){
+                let list = res.data.body.list[i].personnelList[j]
+                listarr.push({
+                  checkedstate: false,
+                  names: list.name,
+                  offics:list.office.name,
+                  headimg:this.globals.requesturl+list.redBottomPhoto,
+                  id:list.id
+                })
+              }
+            }else{
+              this.$message.error('暂无相关人员'); 
+            }
+          }
+          this.staff = listarr
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+      this.info = false
+      this.issearch = true
+      this.ifnounits = false
+      this.iscol1 = false
+      this.iscol2 = false
+      this.iscol3 = false
+      this.iscol4 = false
+      this.issearchlist1 = true
+      this.issearchlist2 = false
+    },
+    // 根据关键字和名字查询人员信息点击
+    searchprople(id){
+      let that = this
+      that.exportids = id
+      let objpeople = {
+        userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+        personnelId:id 
+      };
+      this.$ajax({
+        method:"POST",
+        data:objpeople,
+        url: that.globals.requesturl + 'web/personnel/indexPersonnel',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.success && res.data.errorCode == -1){
+          let arrlist = [];
+          res.data.body.list.map(function(list){
+            switch(list.name){
+              case '谈话情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/tanhua.png"),selimg:require("@/assets/issue/tanhua1.png")});
+                break;
+              case '函询情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/hanxun.png"),selimg:require("@/assets/issue/hanxun1.png")});
+                break;
+              case '谈话+函询情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/tanhan.png"),selimg:require("@/assets/issue/tanhan1.png")});
+                break;
+              case '初核情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/chuhe.png"),selimg:require("@/assets/issue/chuhe1.png")});
+                break;
+              case '暂存情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/zancun.png"),selimg:require("@/assets/issue/zancun1.png")});
+                break;
+              case '拟立案情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/lian.png"),selimg:require("@/assets/issue/lian1.png")});
+                break;
+              case '了结情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/lejie.png"),selimg:require("@/assets/issue/lejie1.png")});
+                break;
+              case '转办情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/zhunaban.png"),selimg:require("@/assets/issue/zhunaban1.png")});
+                break;
+              case '党纪处分情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/dangji.png"),selimg:require("@/assets/issue/dangji1.png")});
+                break;
+              case '党组织党纪处分情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/dangzu.png"),selimg:require("@/assets/issue/dangzu1.png")});
+                break;
+              case '批评教育情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/piping.png"),selimg:require("@/assets/issue/piping1.png")});
+                break;
+              case '组织处理情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/zuzhi.png"),selimg:require("@/assets/issue/zuzhi1.png")});
+                break;
+              case '政务处分情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/zhengwu.png"),selimg:require("@/assets/issue/zhengwu1.png")});
+                break;
+              case '其他情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/qita.png"),selimg:require("@/assets/issue/qita1.png")});
+                break;
+              case '问责情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/wenze.png"),selimg:require("@/assets/issue/wenze1.png")});
+                break;
+              case '民主生活会情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/minzhu.png"),selimg:require("@/assets/issue/minzhu1.png")});
+                break;
+              case '任职变动情况':
+                arrlist.push({title:list.name,num:list.number,imgs:require("@/assets/issue/renzhi.png"),selimg:require("@/assets/issue/renzhi1.png")});
+                break;
+            }
+            that.humanitem = arrlist
+          })
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+    },
+    searchresultsitem(dex,item){
+      this.peopleid = item.id
+      this.searchprople(item.id)
+      this.staff.map(function(list){
+        list.checkedstate = false
+      })
+      this.headpic = item.headimg
+      this.staff[dex].checkedstate = true
+      this.issearchlist2 = true
+    },
+    //导出人员信息
+    exportbtns(){
+      if(this.exportids == ""){
+        this.$message.error("请选择需要导出的人员"); 
+      }else{
+        let obbjstr = {
+          ids:this.exportids,
+          userId:JSON.parse(localStorage.getItem('userinfo')).isd,
+        }
+        this.$ajax({
+          method: "POST",
+          url: this.globals.requesturl + 'web/personnel/export',
+          data: obbjstr,
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          transformRequest: [function (data) { 
+            return qs.stringify(data)
+          }]
+        }).then(res=>{
+          if(res.data.errorCode == "-1"){
+            let url = res.data.body.path
+            let link = document.createElement('a')
+            link.style.display = 'none'
+            link.href = url
+            link.setAttribute('download', '人员台账表')
+            document.body.appendChild(link)
+            link.click()
+            this.$message.success(res.data.msg); 
+          }else{
+            this.$message.error(res.data.msg); 
+          }
+        })
+      }
+    },
+    //获取单位数量
+    allunitsfun(obj){
+      let that = this; 
+      this.$ajax({
+        method: "POST",
+        url: that.globals.requesturl + 'web/index/getChildOfficeNumber',
+        data: obj,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+          if(res.data.errorCode == "-1"){
+            // that.allunits = res.data.body.number
+            that.officeCount = res.data.body.officeCount
+            that.orgCount = res.data.body.orgCount
+          }
+      })
+    },
+    // ===================查询单位====================== 
+    indexinfo(value) {
+      return value + 1 > 9 ? value + 1 : "0" + (value + 1);
+    },
+    initunits() {
+      let that = this;
+      let objs = {
+        userId: JSON.parse(localStorage.getItem("userinfo")).isd
+      };
+      this.$ajax({
+        method: "POST",
+        url: that.globals.requesturl + "web/office/list",
+        data: objs,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        transformRequest: [
+          function(data) {
+            return qs.stringify(data);
+          }
+        ]
+      }).then(res => {
+        console.log(res.data)
+        if (res.data.errorCode == "-1") {
+          let lists = [];
+          console.log(lists)
+          that.unitslist = res.data.body.officeList.map(function(list, index) {
+            console.log(list)
+            return {
+              id: list.id,
+              name: list.name,
+              children: []
+            };
+          });
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    //级联事件
+    unitChanges(data) {
+      let that = this;
+      let objs = {
+        userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+        parentId: data[data.length - 1]
+      };
+      this.$ajax({
+        method: "POST",
+        url: that.globals.requesturl + "web/office/getChildren",
+        data: objs,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        transformRequest: [
+          function(data) {
+            return qs.stringify(data);
+          }
+        ]
+      }).then(res => {
+        if (res.data.errorCode == "-1") {
+          // that.showinputcompanyName = false
+          if (data.length == 1) {
+            that.unitslist.map(function(list, index) {
+              if (list.id == data[0]) {
+                if (!list.children.length) {
+                  list.children = res.data.body.officeList.map(function(
+                    list,
+                    index
+                  ) {
+                    return {
+                      id: list.id,
+                      name: list.name,
+                      children: list.hasChildren == false ? "" : []
+                    };
+                  });
+                }
+              }
+            });
+          } else if (data.length == 2) {
+            that.unitslist.map(function(list, index) {
+              if (list.id == data[0]) {
+                list.children.map(function(list, index) {
+                  if (list.id == data[1]) {
+                    if (!list.children.length) {
+                      list.children = res.data.body.officeList.map(function(
+                        list,
+                        index
+                      ) {
+                        return {
+                          id: list.id,
+                          name: list.name,
+                          children: list.hasChildren == false ? "" : []
+                        };
+                      });
+                    }
+                  }
+                });
+              }
+            });
+          }else if(data.length == 3){
+            that.unitslist.map(function(list,index){
+              if(list.id == data[0]){
+                list.children.map(function(list,index){
+                  if(list.id == data[1]){
+                    list.children.map(function(list,index){
+                      if(list.id == data[2]){
+                        if(!list.children.length){
+                          list.children = res.data.body.officeList.map(function(list,index){
+                            return {
+                              id: list.id,
+                              name: list.name,
+                              children:list.hasChildren==false?"":[]
+                            }
+                          })
+                        }
+                      }
+                    })
+                    
+                  }
+                })
+              }
+            })
+          }
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    // 表格样式的处理
+    cellStyle({ row, column, rowIndex, columnIndex }) {
+      //基数偶数延时不同
+      if (rowIndex % 2 != 0) {
+        return {
+          "background-color": "#2162A8",
+          "text-align": "center",
+          color: "#fff",
+          "font-weight": "normal",
+          padding: "5px 0",
+          height: "60px"
+        };
+      } else {
+        return {
+          "background-color": "#02468F",
+          "text-align": "center",
+          color: "#fff",
+          "font-weight": "normal",
+          height: "60px",
+          padding: "5px 0"
+        };
+      }
+    },
+    headerCellStyle({ row, rowIndex }) {
+      return {
+        "background-color": "#027DBC",
+        "text-align": "center",
+        color: "#fff",
+        "font-weight": "normal",
+        height: "60px",
+        "font-size": "16px"
+      };
+    },
+    //查看个人信息导出
+    personlExportbtns(){
+      let obbjstr = {
+        ids:this.peopleid,
+        userId:JSON.parse(localStorage.getItem('userinfo')).isd,
+      }
+      // console.log(obbjstr)
+      this.$ajax({
+        method: "POST",
+        url: this.globals.requesturl + 'web/personnel/export',
+        data: obbjstr,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) { 
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.errorCode == "-1"){
+          // console.log(res.data)
+          let url = res.data.body.path
+          let link = document.createElement('a')
+          link.style.display = 'none'
+          link.href = url
+          link.setAttribute('download', '人员台账表')
+          document.body.appendChild(link)
+          link.click()
+          this.$message.success(res.data.msg); 
+        }else{
+          this.$message.error(res.data.msg); 
+        }
+      })
+    }
+
+  },
+  watch: {
+    companydata: {
+      handler(newVal, oldVal) {
+        this.checkedall = true;
+        this.companydata.map(item => {
+          if (!item.checkedstate) {
+            this.checkedall = false;
+          }
+        })
+      },
+      deep: true
+    }
+  }
+}

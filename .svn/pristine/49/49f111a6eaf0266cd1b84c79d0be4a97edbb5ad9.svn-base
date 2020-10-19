@@ -1,0 +1,9 @@
+.home{
+    // 正文
+    .home_main{
+        overflow: hidden;
+        // padding: 2px 0 2px 23px;
+        position: relative;
+        height: 534px;
+    }
+}

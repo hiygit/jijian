@@ -1,0 +1,108 @@
+.homemain{
+    width: 1000px;
+    height: 532px;
+    position: absolute;
+    right: 0px;
+    top: 0;
+    .datebox{
+        width: 94.5%;
+        height: 25px;
+        margin-left: 8px;
+        margin-top: 2px;
+        margin-bottom: 10px;
+        border: 1px solid #03D0FF;
+        -webkit-box-shadow:0 0 5px #03D0FF inset;
+        position: relative;
+        padding: 0.9375vw 0.78125vw;
+        // background: rgba(0,0,0,.3);
+    }
+    // 幻灯片幕布
+    .el-carousel{
+        height: 100%;
+        // 设置幻灯片的大小
+        .el-carousel__container{
+            height: 100%;
+            overflow-y: auto;
+            // 幻灯片左右的按钮
+            .el-carousel__arrow{
+                width: 22px;
+                height: 22px;
+                background-color: #02468F;
+                font-size: 24px;
+                font-weight: bold;
+            }
+            // 左边的按钮
+            // .el-carousel__arrow--left{
+            //     left: -5px;
+            //     .el-icon-arrow-left{
+            //         font-weight: bold;
+            //     }
+            // }
+            // 左边的按钮
+            // .el-carousel__arrow--right{
+            //     right: -5px;
+            //     .el-icon-arrow-right{
+            //         font-weight: bold;
+            //     }
+            // }
+            
+        }
+        // 取消下面的走马灯展示
+        .el-carousel__indicators--horizontal{
+            display: none;
+        }
+    }
+    .el-carousel__item{
+        padding-left: 10px;
+        box-sizing: border-box;
+    }
+    // 幻灯片
+    .homemain_page{
+        overflow: hidden;
+        .homemain_page_item{
+            width: 450px;
+            height: 228px;
+            border: 1px solid #03D0FF;
+            box-shadow:0 0 5px #03D0FF inset;
+            -webkit-box-shadow:0 0 5px #03D0FF inset;
+            -moz-box-shadow:0 0 5px #03D0FF inset;
+            -o-box-shadow:0 0 5px #03D0FF inset;
+            position: relative;
+            float: left;
+            padding: 12px 10px;
+            // 头部
+            .homemain_page_item_header{
+                height: 24px;
+                line-height: 24px;
+                vertical-align: middle;
+                position: relative;
+
+                img{
+                    width: 22px;
+                    height: 19px;
+                    position: relative;
+                    top: 50%;
+                    margin-top: -9px;
+                }
+                .homemain_page_item_header_text{
+                    padding-left: 8px;
+                    font-size: 14px;
+                    color: #fff;
+                }
+            }
+        }
+        // 四个盒子下面的margin
+        .homemain_page_item1{
+            margin-top: 2px;
+            margin-bottom: 10px;
+        }
+        // 四个盒子右边的margin
+        .homemain_page_item2{
+            margin-right: 21px;
+        }
+    }
+
+    // .el-carousel__item{
+    //     background-color: #f66;
+    //   }
+}

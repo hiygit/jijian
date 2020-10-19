@@ -1,0 +1,832 @@
+﻿<template>
+  <div class="content home">
+    <Navbar :navtabActive="3" />
+    <div class="StandBook" v-loading="loading">
+      <span class="border row1"></span>
+      <span class="border row2"></span>
+      <span class="border col1"></span>
+      <span class="border col2"></span>
+      <div class="allData">
+        <el-row :gutter="20">
+          <el-col :span="18" style="border-right:1px solid #03D0FF">
+            <el-row :gutter="20">
+              <div class="tablistitembox">
+                <div v-for="(item,index) in totalList" :key="index">
+                  <div  @click="handleSearchTable(index)" style="display:flex;width:100%;padding:20px 0;align-items: center;" >
+                    <img class="dataMediaImg" src="../../assets/talkActive.png" v-if="pages==index" alt />
+                    <img class="dataMediaImg" src="../../assets/talk.png" v-else alt />
+                    <!-- <img :src="isChoose==1?src1Active:src1" class="dataMediaImg" /> -->
+                    <div class="dataMediatext" style="flex:1;height:80px;float:left;padding:5px 10px">
+                      <p class="mediaTextTitle">{{item.name}}</p>
+                      <p class="mediaTextData">
+                        {{item.count}}
+                        <span>件</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </el-row>
+          </el-col>
+          <el-col :span="6" style="padding:10px 20px 10px 30px;box-sizing:border-box">
+            <div class="formSearch">
+              <!-- <div class="formSearchOne">
+                <span class="formSearchLabel">查找:</span>
+                <input class="searchInp" type="text" placeholder="关键字查找" v-model="keyworktext" />
+                <button class="searchBtn" @click="searckkeyword">
+                  <span class="el-icon-search" style="margin-right:5px;"></span>查询
+                </button>
+              </div> -->
+              <!-- <div class="formSearchTwo"> -->
+                <!-- <span class="formSearchLabel">操作:</span> -->
+                <!-- <button class="updownSearch widthLong" @click="goLink('/standBookEnter')">台账录入</button> -->
+                <button class="updownSearch widthLong" @click="personnelpops = true">台账录入</button>
+                <button class="updownSearch widthNormal" @click="exportbtn">导出</button>
+              <!-- </div> -->
+            </div>
+          </el-col>
+        </el-row>
+      </div>
+
+      <!-- 表格内容 -->
+      <div class="showDataTable">
+        <div class="formSearch" style="margin-bottom: 20px;">
+          <span style="color: #fff;font-size: 1.09375vw;">查找：</span>
+          <input class="searchTableInp" placeholder="关键字查找" v-model="keyworktext"/>
+          <div style="display:inline-block;margin-right:20px">
+            <span style="color:#fff;font-size:18px">时间：</span>
+            <el-date-picker class="addTime" v-model="startDate" type="date" placeholder="请选择开始时间" format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
+            <el-date-picker class="addTime" v-model="endDate" type="date" placeholder="请选择结束时间" format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
+          </div>
+          <button class="searchTableBtn" style="background:#025BFF;margin-right:15px;" @click="searckkeyword">
+            <span class="el-icon-search" style="margin-right:5px;"></span>查询
+          </button>
+        </div>
+        <el-table v-loading="loading1" :data="tableData" border :height="tableHeight" stripe style="background-color:transparent" :cell-style="cellStyle" :header-cell-style="headerCellStyle" width="100%">
+          <el-table-column :resizable="false" prop="number" label="序号" type="index" :index="indexinfo" width="80"></el-table-column>
+          <el-table-column :resizable="false" prop="alwaysTime" label="来件时间"></el-table-column>
+          <!-- <el-table-column prop="createDate" label="收件时间"></el-table-column> -->
+          <el-table-column :resizable="false" prop="clueStoTheSource" label="线索来源"></el-table-column>
+          <el-table-column :resizable="false" prop="groupNumber" label="组内线索编号"></el-table-column>
+          <el-table-column :resizable="false" prop="clueNumber" label="线索件数"></el-table-column>
+          <el-table-column :resizable="false" prop="isDuplicateOrNot" label="是否重复件"></el-table-column>
+          <el-table-column :resizable="false" prop="transferredResult" label="办理结果"></el-table-column>
+          <el-table-column :resizable="false" prop="disponsalWay" label="进度"></el-table-column>
+          <el-table-column :resizable="false" prop="name" label="被反映人姓名"></el-table-column>
+          <el-table-column :resizable="false" prop="office" label="被反映人工作单位" width="130px"></el-table-column>
+          <el-table-column :resizable="false" prop="presentOccupation" label="被反映人职务"></el-table-column>
+          <el-table-column :resizable="false" label="操作" width="260px">
+            <template slot-scope="scope">
+              <el-button type="primary" size="mini" @click="handleEdit(scope.$index, scope.row)">查看</el-button>
+              <el-button type="primary" size="mini" @click="updatabtn(scope.$index, scope.row)">修改</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+
+    <!------------------- 台账录入弹窗 ------------------------->
+    <transition name="personnelframe">
+      <div class="personnelframe" v-if="personnelpops">
+        <div class="personnelframe-close"></div>
+        <div class="personnelframe-container">
+          <div class="personnelframe-container-box">
+            <div class="personnelframe-title">
+              <img src="@/assets/courseIcon.png" alt srcset />
+              <h3>线索台账分类选择</h3>
+            </div>
+            <div class="personnelframe-box">
+              <div class="yesno-adminBox">
+                <h3>是否由我们管辖：</h3>
+                <div>
+                  <el-radio v-model="radio" label="1">是</el-radio>
+                  <el-radio v-model="radio" label="2">否</el-radio>
+                </div>
+              </div>
+              <div class="yesno-adminBox">
+                <h3>反映类型：</h3>
+                <div class="reflectType">
+                  <ul :class="isactive == index ? 'reflectTypeColor2':'reflectTypeColor1'" v-for="(item,index) in reflectTypeList" :key="'i'+index" @click="tabBtn(index)">
+                    <li>{{item.name}}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="personnelframe-btns">
+            <el-button type="primary" @click="personnelpops=false">取消</el-button>
+            <el-button type="warning" @click="submitBtn">确定</el-button>
+          </div>
+        </div>
+      </div>
+    </transition>
+    <!------------------- ---- ------------------------->
+  </div>
+</template>
+
+<script>
+import Navbar from "@/components/Navbar/index.vue";
+import qs from "qs";
+export default {
+  name: "StandBook",
+  data() {
+    return {
+      loading:true,
+      loading1:true,
+      startDate:"",//开始时间
+      endDate:"",//结束时间
+
+      personnelpops: false, //弹框显示切换
+      radio: '1',//弹框单选按钮 1-是 2-否
+      //反应类型
+      reflectTypeList:[
+        {name:"人员"},
+        {name:"单位"},],
+      isactive: 0, //弹框人员和单位 0-人员 1-单位
+      reflectTypeIndex:1,
+      userinfo: {}, //用户信息缓存
+      totalList: [], //所有数据
+      tablearr: [], 
+      lists: {},
+      sourcelist: [], //线索来源
+      isnoList: [], //是否
+      progresslist: [], //进度
+      keyworktext: "", //关键字查找
+      tableHeadList: [],
+      tableData: [],//表格数据
+      pages: "0",
+      page:0,//第几页
+      pagesize:10,//每页显示条数
+      form: {},
+      isChoose: "",
+      //表格高度
+      tableHeight: "51vh",
+      //图片动态
+      src1: require("../../assets/talk.png"),
+      src1Active: require("../../assets/talkActive.png"),
+      //图片动态
+      src2: require("../../assets/check.png"),
+      src2Active: require("../../assets/checkActive.png"),
+      //图片动态
+      src3: require("../../assets/search.png"),
+      src3Active: require("../../assets/searchActive.png"),
+      //图片动态
+      src4: require("../../assets/over.png"),
+      src4Active: require("../../assets/overActive.png")
+    };
+  },
+  created() {
+    document.title = "线索台账";
+    //线索来源
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "clue_sto_the_source" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        this.sourcelist = res.data.body.dictValueList;
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //进度
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "disponsal_way" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        // console.log(res.data);
+        this.progresslist = res.data.body.dictValueList;
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+    //是否
+    this.$ajax({
+      method: 'POST',
+      url: this.globals.requesturl + 'web/dict',
+      data: { type: 'yes_no' },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data)
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == '-1') {
+        this.isnoList = res.data.body.dictValueList
+      } else {
+        this.$message.error(res.data.msg)
+      }
+    })
+  },
+  components: {
+    Navbar
+  },
+  mounted() {
+    let objs = {
+      userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+      pageNo:this.page,
+      pageSize:this.pagesize,
+    };
+    this.userinfo = JSON.parse(localStorage.getItem("userinfo")); //登录页面缓存 userId
+    this.init(objs); //线索台账首页
+  },
+  methods: {
+    // 台账录入弹窗里的按钮
+    tabBtn(index){
+      console.log(index)
+      let that = this
+      this.isactive = index
+    },
+    //弹框里的确定按钮
+    submitBtn(){
+      this.$router.push({path: "/StandBookEnter",query:{isactive:this.isactive,radio:this.radio}});
+    },
+
+    //下标处理
+    indexinfo(value) {
+      return value + 1 > 9 ? value + 1 : "0" + (value + 1);
+    },
+    // 表格样式的处理
+    cellStyle({ row, column, rowIndex, columnIndex }) {
+      //基数偶数延时不同
+      if (rowIndex % 2 != 0) {
+        return {
+          "background-color": "#2162A8",
+          "text-align": "center",
+          color: "#fff",
+          "font-weight": "normal",
+          padding: "5px 0"
+        };
+      } else {
+        return {
+          "background-color": "#02468F",
+          "text-align": "center",
+          color: "#fff",
+          "font-weight": "normal",
+          padding: "5px 0"
+        };
+      }
+    },
+    headerCellStyle({ row, rowIndex }) {
+      return {
+        "background-color": "#027DBC",
+        "text-align": "center",
+        color: "#fff",
+        "font-weight": "normal",
+        "font-size": "16px"
+      };
+    },
+
+    //表格内容的切换
+    handleSearchTable(index) {
+      this.pages = index;
+      let that = this
+      let tablearr = []; 
+      console.log(this.totalList)
+      this.totalList[index].cluesParameterList.map(function(lists) {
+        let obj = {
+          // createDate: lists.createDate.split(" ")[0],
+          clueStoTheSource: lists.clueStoTheSource,
+          groupNumber: lists.groupNumber,
+          clueNumber: lists.clueNumber,
+          alwaysTime: lists.alwaysTime,
+          isDuplicateOrNot: lists.isDuplicateOrNot,
+          transferredResult: lists.transactionResult,
+          disponsalWay: lists.disponsalWay,
+          name: lists.personnel?lists.personnel.name:"",
+          office: lists.office,
+          presentOccupation: lists.personnel?lists.personnel.presentOccupation:"",
+          id: lists.id, //线索台账id
+          type: lists.type,
+        }
+        for (let s = 0; s < that.sourcelist.length; s++) {
+          if (that.sourcelist[s].value == lists.clueStoTheSource) {
+            obj.clueStoTheSource = that.sourcelist[s].label;
+          }
+        }
+        for (let s = 0; s < that.progresslist.length; s++) {
+          if (that.progresslist[s].value == lists.disponsalWay) {
+            obj.disponsalWay = that.progresslist[s].label;
+          }
+        }
+        for (let s = 0; s < that.isnoList.length; s++) {
+          if (that.isnoList[s].value == lists.isDuplicateOrNot) {
+            obj.isDuplicateOrNot = that.isnoList[s].label;
+          }
+        }
+        if(lists.type == 2){
+          obj.office = lists.beReflectedUnitName
+          // obj.office = lists.beReflectedUnit.name?lists.beReflectedUnit.name:"" 
+          // obj.disponsalWay = lists.disponsalWay
+        }else if(lists.type == 1 || lists.type == 2){
+          obj.office = lists.beReflectedUnitName
+          // obj.office = lists.personnel?lists.personnel.office.name:""
+        }else if(lists.type == 3){
+          obj.office = lists.personnel?lists.personnel.externalPersonnelUnit:""
+        }else if(lists.type == 4){
+          obj.office = lists.outOfficeName?lists.outOfficeName:""
+        }
+        tablearr.push(obj);
+      });
+      this.tableData = tablearr;
+      // console.log(this.tableData)
+    },
+    // 页面跳转 台账录入 参数userid 人员调动记录id
+    goLink(e) {
+      this.$router.push({path: e,});
+    },
+    //查看详情
+    handleEdit(index) {
+      let id = this.tableData[index].id
+      this.$router.push({path: "/standBookEnter",query: {id:id,ifupdata:1}});
+    },
+    //修改
+    updatabtn(index){
+      let id = this.tableData[index].id
+      let type = this.tableData[index].type
+      console.log(type)
+      this.$router.push({path: "/standBookEnter",query: {id: id,type:type}});
+    },
+    //初始化
+    init(objs) {
+      //线索台账首页
+      this.$ajax({
+        method: "post",
+        url: this.globals.requesturl + "web/cluesparameter/index",
+        data: objs,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        transformRequest: [
+          function(data) {
+            return qs.stringify(data);
+          }
+        ]
+      }).then(res => {
+        let that = this;
+        if (res.data.errorCode == "-1") {
+          that.loading=false
+          that.loading1=false
+          let arrList = res.data.body.list;
+          let oner = true
+          oner = arrList[0]
+          arrList.map(function(list) {
+            that.totalList.push(list);
+          });
+          //表格列表
+          let tablearr = []; 
+          if (arrList[0].cluesParameterList.length > 0) {
+            for (let j = 0; j < arrList[0].cluesParameterList.length; j++) {
+              let lists = arrList[0].cluesParameterList[j];
+              // console.log(lists.beReflectedUnitName)
+              let obj = {
+                // createDate: lists.createDate.split(" ")[0],
+                clueStoTheSource: lists.clueStoTheSource,
+                groupNumber: lists.groupNumber,
+                clueNumber: lists.clueNumber,
+                alwaysTime: lists.alwaysTime,
+                isDuplicateOrNot: lists.isDuplicateOrNot,
+                transferredResult: lists.transferredResult,
+                disponsalWay: lists.disponsalWay,
+                name: lists.personnel?lists.personnel.name:"",
+                office: lists.personnel?lists.personnel.office.name:"",
+                presentOccupation: lists.personnel?lists.personnel.presentOccupation:"",
+                id: lists.id, //线索台账id,
+                type: lists.type
+              };
+              for (let s = 0; s < that.sourcelist.length; s++) {
+                if (that.sourcelist[s].value == lists.clueStoTheSource) {
+                  obj.clueStoTheSource = that.sourcelist[s].label;
+                }
+              }
+              for (let s = 0; s < that.progresslist.length; s++) {
+                if (that.progresslist[s].value == lists.disponsalWay) {
+                  obj.disponsalWay = that.progresslist[s].label;
+                }
+              }
+              for (let s = 0; s < that.isnoList.length; s++) {
+                if (that.isnoList[s].value == lists.isDuplicateOrNot) {
+                  obj.isDuplicateOrNot = that.isnoList[s].label;
+                }
+              }
+              if(lists.type == 2){
+                obj.office = lists.beReflectedUnitName
+                // obj.office = lists.beReflectedUnit.name?lists.beReflectedUnit.name:"" 
+                // obj.disponsalWay = "收件"
+              }else if(lists.type == 1 || lists.type == 2){
+                obj.office = lists.beReflectedUnitName
+                // obj.office = lists.personnel?lists.personnel.office.name:""
+              }else if(lists.type == 3){
+                obj.office = lists.personnel?lists.personnel.externalPersonnelUnit:""
+              }else if(lists.type == 4){
+                obj.office = lists.outOfficeName?lists.outOfficeName:""
+              }
+              tablearr.push(obj);
+            }
+            that.tableData = tablearr;
+          }
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    //关键字查询
+    searckkeyword() {
+      let that = this;
+      that.loading1=true
+      let dateStart = new Date(that.startDate)
+      let time1 = dateStart.getTime() // 开始时间-转为时间戳
+      let dateEnd = new Date(that.endDate)
+      let time2 = dateEnd.getTime() // 开始时间-转为时间戳
+      console.log(time1)
+      console.log(time2)
+      let objs = {
+        userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+        keyword: this.keyworktext,
+        startDate:that.startDate,
+        endDate:that.endDate
+      };
+      if(that.startDate == ""){
+        this.$message.error("请选择开始时间");
+      }else if(that.endDate == ""){
+        this.$message.error("请选择结束时间");
+      }else if(time1 == ""){
+        this.$message.error("请选择开始时间");
+      }else if(time2== ""){
+        this.$message.error("请选择结束时间");
+      }else if(time2 < time1){
+        this.$message.error("开始时间不得大于结束时间");
+      }
+      else{
+        this.$ajax({
+          method: "POST",
+          url: that.globals.requesturl + "web/cluesparameter/solrSelect",
+          data: objs,
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          transformRequest: [
+            function(data) {
+              return qs.stringify(data);
+            }
+          ]
+        }).then(res => {
+          if (res.data.success && res.data.errorCode == "-1") {
+            let tablearr = [];that.loading1=false;
+            for (let w = 0; w < res.data.body.list.length; w++) {
+              for (let i = 0; i < res.data.body.list[w].cluesParameterList.length; i++ ) {
+                let lists = res.data.body.list[w].cluesParameterList[i];
+                let obj = {
+                  // createDate: lists.createDate.split(" ")[0],
+                  clueStoTheSource: lists.clueStoTheSource,
+                  groupNumber: lists.groupNumber,
+                  clueNumber: lists.clueNumber,
+                  alwaysTime: lists.alwaysTime,
+                  isDuplicateOrNot: lists.isDuplicateOrNot,
+                  transferredResult: lists.transferredResult,
+                  disponsalWay: lists.disponsalWay,
+                  name: lists.personnel.name,
+                  office: lists.personnel.office.name,
+                  presentOccupation: lists.personnel.presentOccupation,
+                  id: lists.id //线索台账id
+                };
+                for (let s = 0; s < that.sourcelist.length; s++) {
+                  if (that.sourcelist[s].value == lists.clueStoTheSource) {
+                    obj.clueStoTheSource = that.sourcelist[s].label;
+                  }
+                }
+                for (let s = 0; s < that.progresslist.length; s++) {
+                  if (that.progresslist[s].value == lists.disponsalWay) {
+                    obj.disponsalWay = that.progresslist[s].label;
+                  }
+                }
+                for (let s = 0; s < that.isnoList.length; s++) {
+                  if (that.isnoList[s].value == lists.isDuplicateOrNot) {
+                    obj.isDuplicateOrNot = that.isnoList[s].label;
+                  }
+                }
+                tablearr.push(obj);
+              }
+              that.tableData = tablearr;
+            }
+          } else {
+            this.$message.error(res.data.msg);
+          }
+        });
+      }
+    },
+    //导出
+    exportbtn(){
+      let that=this,ids=[]
+      if(that.tableData.length == 0){
+        this.$message.error("暂无数据");
+      }else{
+        that.tableData.map(function(list){
+          console.log(list)
+          ids.push(list.id)
+        })
+        let objstr = {
+          ids: ids.join(),
+          userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+        }
+        this.$ajax({
+          method: "POST",
+          url: this.globals.requesturl + 'web/cluesparameter/export',
+          data: objstr,
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          transformRequest: [function (data) { 
+            return qs.stringify(data)
+          }]
+        }).then(res=>{
+          if(res.data.errorCode == "-1"){
+            console.log(res.data)
+            let url = res.data.body.path
+            let link = document.createElement('a')
+            console.log(link)
+            link.style.display = 'none'
+            link.href = url
+            link.setAttribute('download','')
+            document.body.appendChild(link)
+            link.click()
+            this.$message.success(res.data.msg); 
+          }else{
+            this.$message.error(res.data.msg); 
+          }
+        })
+      }
+    }
+  }
+};
+</script>
+
+<style >
+.StandBook {
+  width: 95%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  border: 1px solid #03d0ff;
+  box-shadow: 0 0 5px #03d0ff inset;
+  -webkit-box-shadow: 0 0 5px #03d0ff inset;
+  -moz-box-shadow: 0 0 5px #03d0ff inset;
+  -o-box-shadow: 0 0 5px #03d0ff inset;
+  position: relative;
+  padding: 12px 10px; 
+}
+.StandBook input::-webkit-input-placeholder {
+  color: #fff;
+}
+.StandBook input:-moz-placeholder {
+  color: #fff;
+}
+.StandBook input:-ms-input-placeholder {
+  color: #fff;
+}
+.formSearchOne {
+  display: flex;
+  width: 100%;
+  margin: 10px 0;
+}
+.formSearchTwo {
+  display: flex;
+  /* display: block; */
+  width: 100%;
+  margin: 10px 0;
+}
+.StandBook .updownSearch {
+  background: #028fff;
+  color: #fff;
+  border: none;
+  text-align: center;
+  font-size: 14px;
+  line-height: 35px;
+  height: 35px;
+  border-radius: 5px;
+}
+.StandBook .widthLong {
+  width: 130px;
+  margin: 0 10px;
+  cursor: pointer;
+}
+.StandBook .widthNormal {
+  /* flex: 3; */
+  width: 130px;
+  margin: 0 10px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+.dataMediatext {
+  cursor: pointer;
+}
+.StandBook .searchInp {
+  display: inline-block;
+  border: 1px solid rgba(3, 208, 255, 0.7);
+  border-radius: 3px;
+  background: transparent;
+  text-indent: 5px;
+  padding: 5px;
+  margin: 0 10px;
+  color: #fff;
+  width: 100px;
+  height: 35px;
+  box-sizing: border-box;
+}
+.StandBook .searchBtn {
+  border: none;
+  font-size: 14px;
+  background: #025bff;
+  color: #fff;
+  height: 35px;
+  flex: 3;
+  line-height: 35px;
+  border-radius: 5px;
+  text-align: center;
+  cursor: pointer;
+}
+.StandBook .formSearchLabel {
+  display: inline-block;
+  width: 50px;
+  color: #fff;
+  line-height: 35px;
+  font-weight: normal;
+  font-size: 14px;
+}
+.allData {
+  width: 100%;
+  margin: 10px auto 15px;
+  box-sizing: border-box;
+  border: 1px solid #03d0ff;
+  box-shadow: 0 0 5px #03d0ff inset;
+  -webkit-box-shadow: 0 0 5px #03d0ff inset;
+  -moz-box-shadow: 0 0 5px #03d0ff inset;
+  -o-box-shadow: 0 0 5px #03d0ff inset;
+  position: relative;
+  padding: 12px 10px;
+}
+.dataMediaImg {
+  display: block;
+  width: 80px;
+  height: 80px;
+  float: left;
+  cursor: pointer;
+}
+.mediaTextTitle {
+  font-size: 20px;
+  line-height: 25px;
+  color: #fff;
+}
+.mediaTextData {
+  font-size: 24px;
+  /* line-height: 50px; */
+  color: #fff;
+  font-weight: bold;
+  margin-top: 3px;
+}
+.mediaTextData span {
+  font-size: 12px;
+  margin-left: 8px;
+  color: #fff;
+  font-weight: normal;
+}
+.lableForm label {
+  color: #fff;
+}
+.formAll .el-form-item {
+  margin-bottom: 10px;
+}
+.lableForm .el-input__inner {
+  background: transparent;
+  border: 1px solid #03d0ff;
+  color: white;
+}
+/* 设置滚动条的样式 */
+::-webkit-scrollbar {
+  width: 3px;
+  background-color: #02468f;
+}
+
+/* 滚动槽 */
+::-webkit-scrollbar-track {
+  border-radius: 10px;
+}
+
+/* 滚动条滑块 */
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #0965ae;
+}
+.tablistitembox{
+  width: auto;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+}
+.tablistitembox>div{
+  margin-left: 10px;
+  flex-shrink: 0;
+}
+
+/* 弹窗 */
+.personnelframe-box{
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+.yesno-adminBox{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top:25px;
+}
+.yesno-adminBox h3{
+  color: #333;
+  font-size: 12px;
+}
+.reflectType ul{
+  float: left;
+  margin-right: 15px;
+}
+.reflectType ul li{
+  display: inline-block;
+  padding: 8px 21px;
+  color: #fff;
+  cursor: pointer;
+}
+.reflectType ul:last-child{
+  /* background:#E08801; */
+  margin-right: 0;
+}
+.reflectTypeColor1{
+  background:#014890;
+  border-radius: 5px;
+}
+.reflectTypeColor2{
+  background:#E08801;
+  border-radius: 5px;
+}
+
+/* 查找 */
+.searchTableInp {
+  display: inline-block;
+  border: 1px solid rgba(3, 208, 255, 0.7);
+  border-radius: 3px;
+  background: transparent;
+  text-indent: 5px;
+  padding: 5px;
+  margin: 0 10px;
+  color: #fff;
+  width: 150px;
+  height: 35px;
+  box-sizing: border-box;
+  font-size: 12px;
+}
+.searchTableBtn {
+  width: 90px;
+  border: none;
+  font-size: 14px;
+  color: #fff;
+  height: 35px;
+  line-height: 35px;
+  border-radius: 5px;
+  text-align: center;
+  cursor: pointer;
+}
+
+</style>
+
+<style scoped>
+  .StandBook /deep/ .el-col-18 {
+      width: 84%;
+  }
+  .StandBook /deep/ .el-col-6 {
+      width: 16%;
+  }
+  .StandBook /deep/ .el-input--prefix .el-input__inner{
+    background: none;
+    width: 85%;
+    height: 2.8vw;
+    border: 1px solid rgba(3, 208, 255, 0.7);
+  }
+  .StandBook /deep/ .el-date-editor.el-input{
+    width: 15.1875vw;
+    margin-right: -15px;
+  }
+  .StandBook /deep/ .el-input__inner{
+    color: #fff !important;
+    margin-top: 3px;
+  }
+  .StandBook /deep/ .el-input__suffix{
+    right: 3vw !important;
+  }
+</style>
+

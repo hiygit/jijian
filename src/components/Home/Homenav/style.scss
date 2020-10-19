@@ -1,0 +1,154 @@
+.homenav{
+    width: 201px;
+    border: 1px solid #03D0FF;
+    box-shadow:0 0 5px #03D0FF inset;
+    -webkit-box-shadow:0 0 5px #03D0FF inset;
+    -moz-box-shadow:0 0 5px #03D0FF inset;
+    -o-box-shadow:0 0 5px #03D0FF inset;
+    padding: 14px 20px;
+    height: 500px;
+    text-align: center;
+    position: absolute;
+    left: 23px;
+    top: 2px;
+
+    // 待办图片
+    .homenav_img_stayneed{
+        width: 48px;
+        height: 48px;
+        display: block; 
+        margin: auto;
+    }
+    // 待办事项
+    .homenav_stayneed{
+
+        width: 200px;
+        height: 95px;
+        left: 44px;
+        background-color: rgba(9, 101, 174, 1);
+        box-shadow:0 0 5px #03D0FF inset;
+        -webkit-box-shadow:0 0 5px #03D0FF inset;
+        -moz-box-shadow:0 0 5px #03D0FF inset;
+        -o-box-shadow:0 0 5px #03D0FF inset;
+        border: 1px solid rgba(3, 208, 255, 0.5);
+        margin-top: -22px;
+        padding-top: 22px;
+
+        h2{
+            color: rgba(255, 255, 255, 1);
+            font-size: 38px;
+        }
+        p{
+            font-size: 12px;
+            color: #fff;
+            padding-bottom: 21px;
+        }
+        
+    }
+    // 点击查看
+    .homenav_stayneed_look{
+        cursor:pointer ;
+        width: 80px;
+        height: 25px;
+        border-radius: 12px;
+        background-color: rgba(23, 165, 255, 1);
+        line-height: 25px;
+        margin: 0 auto ;
+        left: 116px;
+        color: rgba(255, 255, 255, 1);
+        font-size: 14px;
+        margin-top: -13px;
+    }
+    // 单位数图片
+    .homenav_img_unitnum{
+        margin-top: 10px;
+    }
+    // 单位数
+    .homenav_unitnum{
+        height: auto;
+        p{
+            padding-bottom: 5px;
+        }
+        // 选择哪家单位
+        .homenav_unitum_main{
+            border-top: 1px solid #03D0FF;
+            padding: 16px 0 0 6px;
+            // 单位数列表
+            .homenav_unitum_main_company{
+                // overflow-y: auto;
+                height: 135px;
+                // 取消element的左边滚动条
+                .el-scrollbar__wrap{
+                    overflow-x: hidden;
+                }
+            }
+            .homenav_unitum_main_item{
+                padding-left: 12px;
+                overflow: hidden;
+                text-align: left;
+                // line-height: 23px;
+                color: rgba(255, 255, 255, 1);
+                font-size: 14px;
+                margin-bottom: 12px;
+                cursor: pointer;
+                div:nth-child(2){
+                    width: 120px;
+                    line-height: 23px;
+                }
+                div{
+                    float: left;
+                    
+                }
+                .homenav_unitum_main_item_empty{
+                    float: left;
+                    border-radius: 50%;
+                    width: 21px;
+                    height: 21px;
+                    border: 1.25px solid #fff;
+                    margin-right: 8px;
+                    text-align: center;
+                    
+                    // line-height: 21px;
+                    // 内部的div
+                    .homenav_unitum_main_item_empty_selectempty_inside{
+                        border-radius: 50%;
+                        display: inline-block;
+                        vertical-align:middle;
+                        width: 16px;
+                        height: 16px;
+                        background: #5677fc;
+                    }
+                }
+                // 选中的样子
+                .homenav_unitum_main_item_empty_selectempty{
+                    border: 1.25px solid #5677fc;
+
+                }
+            }
+            // 所有的
+            .homenav_unitum_main_item_all{
+                border: 1px dashed #09D5E7;
+                padding: 10px 0 10px 12px;
+                margin-right: 6px;
+                // 全选框为空
+                .homenav_unitum_main_item_empty{
+                    width: 17px;
+                    height: 17px;
+                    border: 2px solid #fff;
+                    img{
+                        width: 100%;
+                        height: 100%;
+                        display: block;
+                    }
+                }
+                // 全选狂选中的样子
+                .homenav_unitum_main_item_all_border{
+                    border: 2px solid #ccc;
+                }
+            }
+        }
+    }
+}
+
+
+

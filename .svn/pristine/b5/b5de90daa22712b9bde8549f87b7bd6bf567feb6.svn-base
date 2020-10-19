@@ -1,0 +1,782 @@
+<template>
+  <div class="genzongs">
+    <!-- 面包屑导航 -->
+    <div class="navcrumbed">
+      <div class="navcrumbedimg">
+        <img @click="goback" style="cursor: pointer;" src="@/assets/navblack.png" alt srcset />
+        <!-- <img src="@/assets/navblack.png" alt srcset /> -->
+        <span>当前位置：</span>
+      </div>
+      <div class="navcrumbedlist">
+        <el-breadcrumb separator-class="el-icon-arrow-right">
+          <el-breadcrumb-item :to="{ path: '/problemstandbook' }">问题台账</el-breadcrumb-item>
+          <el-breadcrumb-item>重点工作进度跟踪</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+    </div>
+    <div class="content home">
+      <div class="ProblemStandBookPF">
+        <span class="border row1"></span>
+        <span class="border row2"></span>
+        <span class="border col1"></span>
+        <span class="border col2"></span>
+        <div class="ProblemStandBookPFMain">
+          <div class="searchBackLog">
+            <el-form :inline="true" :model="formInline" class="demo-form-inline">
+              <el-form-item label="查找">
+                <el-input v-model="formInline.keyValue" placeholder="关键字查找"></el-input>
+              </el-form-item>
+              <el-form-item label="单位">
+                <el-input v-model="formInline.unit" placeholder="请输入查找的单位"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="onSubmit" icon="el-icon-search">查询</el-button>
+              </el-form-item>
+            </el-form>
+            <div class="searchBtnRight">
+              <el-button type="primary" @click="exportbtn">导出</el-button>
+              <el-button type="primary" @click="entering">录入</el-button>
+            </div>
+          </div>
+          <el-table
+            :data="tableData"
+            width="100%"
+            border
+            :height="tableHeight"
+            stripe
+            style="background-color:transparent"
+            :cell-style="cellStyle"
+            :header-cell-style="headerCellStyle"
+          >
+            <el-table-column label="序号" type="index" :index="indexMethod" width="120"></el-table-column>
+            <el-table-column label="录入时间" prop="date" width="220"></el-table-column>
+            <el-table-column label="承担单位" prop="office"></el-table-column>
+            <el-table-column label="重点工作描述" prop="description"></el-table-column>
+            <el-table-column label="工作进度">
+              <template slot-scope="scope">
+                <el-progress
+                  :text-inside="false"
+                  :color="customColors"
+                  :stroke-width="16"
+                  :percentage="Number(scope.row.jobSchedule)"
+                ></el-progress>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="260">
+              <template slot-scope="scope">
+                <el-button
+                  type="primary"
+                  size="mini"
+                  @click="handleEdit(scope.$index, scope.row)"
+                >更新进度</el-button>
+                <el-button type="primary" size="mini" @click="updatabtn(scope.$index, scope.row)">修改</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+    </div>
+    <!-- 调动弹框 -->
+    <transition name="personnelframe">
+      <div class="personnelframe" v-if="personnelpops">
+        <div class="personnelframe-close"></div>
+        <div class="personnelframe-container">
+          <div class="personnelframe-container-box">
+            <div class="personnelframe-title">
+              <img src="@/assets/diaodong.png" alt srcset />
+              <h3>调动人员信息</h3>
+            </div>
+            <div class="personnelframe-table">
+              <div class="personnelframe-table-tr">
+                <span>当前进度：{{peoplemsg.jobSchedule}}%</span>
+                <div>
+                  <span>新进度：</span>
+                  <el-select v-model="peoplemsg.newJobSchedule" placeholder="请选择">
+                    <el-option v-for="item in options" :key="item" :label="item+'%'" :value="item"></el-option>
+                  </el-select>
+                </div>
+              </div>
+              <div class="personnelframe-table-tr">
+                <el-input
+                  type="textarea"
+                  v-model="peoplemsg.description"
+                  placeholder="进度描述：请填写进度描述（非必填）"
+                ></el-input>
+              </div>
+            </div>
+            <div class="personnelframe-title">
+              <div v-for="(item,index) in recordlist" :key="index">{{item}}</div>
+            </div>
+          </div>
+          <div class="personnelframe-btns">
+            <el-button
+              @click="personnelpops=false"
+              style="background:#029AFF;border:none;color:#fff"
+            >取消</el-button>
+            <el-button
+              type="primary"
+              @click="submitchangeunit"
+              style="background:#E08801;border:none"
+            >保存</el-button>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </div>
+</template>
+
+<script>
+import qs from "qs";
+export default {
+  name: "ProblemStandBookPF",
+  data() {
+    return {
+      personnelpops: false, //弹框
+      options: [], //进度数组
+      recordlist: [], //修改记录
+      peoplemsg: {
+        jobSchedule: "", //原进度
+        newJobSchedule: "", //新进度
+        description: "", //描述
+        id: "" //id
+      },
+      formInline: {
+        keyValue: "",
+        unit: ""
+      },
+      tableData: [],
+      //表格高度
+      tableHeight: "53vh",
+      //进度条样式
+      customColors: "#fff",
+      page: 1, //第几页
+      pagesize: 20 //每页显示条数
+    };
+  },
+  created() {
+    document.title = "重点工作进度跟踪";
+  },
+  mounted() {
+    for (let i = 1; i <= 10; i++) {
+      this.options.push(i * 10);
+    }
+    let objs = {
+      userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+      pageNo: this.page,
+      pageSize: this.pagesize
+    };
+    this.init(objs);
+  },
+  methods: {
+    //下标处理
+    indexMethod(index) {
+      return index + 1 > 9 ? index + 1 : "0" + (index + 1);
+    },
+    //弹框确定按钮
+    submitchangeunit() {
+      let that = this;
+      let querstobj = {
+        userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+        jobSchedule: that.peoplemsg.jobSchedule,
+        newJobSchedule: that.peoplemsg.newJobSchedule,
+        description: that.peoplemsg.description,
+        "keyWorkProgress.id": that.peoplemsg.id
+      };
+      this.$ajax({
+        method: "POST",
+        data: querstobj,
+        url: that.globals.requesturl + "web/keyworkprogress/edit",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        transformRequest: [
+          function(data) {
+            return qs.stringify(data);
+          }
+        ]
+      }).then(res => {
+        if (res.data.success && res.data.errorCode == -1) {
+          that.tableData.map(function(list) {
+            if (list.id == that.peoplemsg.id) {
+              list.jobSchedule = that.peoplemsg.newJobSchedule;
+            }
+          });
+          that.personnelpops = false;
+          this.$message.success(res.data.msg);
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    // 初始化
+    init(objs) {
+      let that = this;
+      this.$ajax({
+        method: "POST",
+        url: that.globals.requesturl + "web/keyworkprogress/list",
+        data: objs,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        transformRequest: [
+          function(data) {
+            return qs.stringify(data);
+          }
+        ]
+      }).then(res => {
+        if (res.data.success && res.data.errorCode == -1) {
+          let listarr = [];
+          res.data.body.keyWorkProgressList.map(function(list) {
+            listarr.push({
+              date: list.createDate,
+              office: list.office,
+              description: list.description,
+              jobSchedule: list.jobSchedule,
+              id: list.id
+            });
+          });
+          that.tableData = listarr;
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    // 表格样式的处理
+    cellStyle({ row, column, rowIndex, columnIndex }) {
+      //基数偶数延时不同
+      if (rowIndex % 2 != 0) {
+        return {
+          "background-color": "#2162A8",
+          "text-align": "center",
+          color: "#fff",
+          "font-weight": "normal",
+          padding: "5px 0"
+        };
+      } else {
+        return {
+          "background-color": "#02468F",
+          "text-align": "center",
+          color: "#fff",
+          "font-weight": "normal",
+          padding: "5px 0"
+        };
+      }
+    },
+    headerCellStyle({ row, rowIndex }) {
+      return {
+        "background-color": "#027DBC",
+        "text-align": "center",
+        color: "#fff",
+        "font-weight": "normal",
+        "font-size": "16px"
+      };
+    },
+    //录入
+    entering() {
+      this.$router.push({ path: "/importjobadd" });
+    },
+    // 修改
+    updatabtn(item, row) {
+      console.log(item, row);
+      this.$router.push({
+        path: "/importjobadd",
+        query: { id: row.id, jobSchedule: row.jobSchedule }
+      });
+    },
+    //导出
+    exportbtn() {
+      let that = this,
+        ids = [];
+      if (that.tableData.length == 0) {
+        this.$message.error("暂无数据");
+      } else {
+        that.tableData.map(function(list) {
+          ids.push(list.id);
+        });
+        let obbjstr = {
+          ids: ids.join(),
+          userId: JSON.parse(localStorage.getItem("userinfo")).isd
+        };
+        this.$ajax({
+          method: "POST",
+          url: this.globals.requesturl + "web/keyworkprogress/export",
+          data: obbjstr,
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          transformRequest: [
+            function(data) {
+              return qs.stringify(data);
+            }
+          ]
+        }).then(res => {
+          if (res.data.errorCode == "-1") {
+            let url = res.data.body.path;
+            let link = document.createElement("a");
+            link.style.display = "none";
+            link.href = url;
+            link.setAttribute("download", "人员台账表");
+            document.body.appendChild(link);
+            link.click();
+            this.$message.success(res.data.msg);
+          } else {
+            this.$message.error(res.data.msg);
+          }
+        });
+      }
+    },
+    //查询
+    onSubmit() {
+      let that = this;
+      let querstobj = {
+        userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+        keyword: this.formInline.keyValue,
+        underWriterName: this.formInline.unit
+      };
+      this.$ajax({
+        method: "POST",
+        data: querstobj,
+        url: this.globals.requesturl + "web/keyworkprogress/solrSelect",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        transformRequest: [
+          function(data) {
+            return qs.stringify(data);
+          }
+        ]
+      }).then(res => {
+        if (res.data.success && res.data.errorCode == -1) {
+          let listarr = [];
+          if (res.data.body.list.length > 0) {
+            for (let i = 0; i < res.data.body.list.length; i++) {
+              if (res.data.body.list[i].keyWorkProgressList.length > 0) {
+                for (
+                  let j = 0;
+                  j < res.data.body.list[i].keyWorkProgressList.length;
+                  j++
+                ) {
+                  var listitem = res.data.body.list[i].keyWorkProgressList[j];
+                  listarr.push({
+                    date: listitem.createDate,
+                    office: listitem.underWriter.name,
+                    description: listitem.description,
+                    jobSchedule: listitem.jobSchedule,
+                    id: listitem.id
+                  });
+                }
+              } else {
+                listarr.push({
+                  date: "",
+                  office: "",
+                  description: "",
+                  jobSchedule: ""
+                });
+              }
+            }
+          }
+          that.tableData = listarr;
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    //更新进度
+    handleEdit(row) {
+      let that = this;
+      let strobj = that.tableData[row];
+      let querstobj = {
+        userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+        id: strobj.id
+      };
+      this.$ajax({
+        method: "POST",
+        data: querstobj,
+        url: that.globals.requesturl + "web/keyworkprogress/form",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        transformRequest: [
+          function(data) {
+            return qs.stringify(data);
+          }
+        ]
+      }).then(res => {
+        if (res.data.success && res.data.errorCode == -1) {
+          that.peoplemsg = {
+            jobSchedule: res.data.body.jobschedule, //原进度
+            newJobSchedule: "", //新进度
+            description: res.data.body.description, //描述
+            id: strobj.id //id
+          };
+          that.recordlist = res.data.body.recordList;
+          that.personnelpops = true;
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    //返回上一页
+    goback() {
+      this.$router.go(-1);
+    }
+  },
+  watch: {}
+};
+</script>
+<style lang="scss">
+.genzongs {
+  .el-breadcrumb__inner {
+    color: #fff;
+  }
+  .el-breadcrumb__item:last-child .el-breadcrumb__inner {
+    color: #03d0ff;
+  }
+  .el-form--inline .el-form-item {
+    margin-bottom: 0;
+  }
+  .el-form-item__label {
+    color: #fff;
+  }
+  .el-input__inner,
+  .el-input__inner:hover {
+    background: transparent;
+    border: 1px solid #016cae;
+  }
+  .el-table,
+  .el-table__expanded-cell,
+  .el-table th,
+  .el-table tr,
+  .el-table th:hover,
+  .el-table tr:hover,
+  .el-table--enable-row-hover .el-table__body tr:hover > td {
+    background: transparent;
+  }
+  .el-table thead,
+  .el-table {
+    color: #fff;
+  }
+  .el-table th {
+    text-align: center;
+  }
+  .el-table .cell {
+    text-align: center;
+  }
+  .el-table--border {
+    border: 1px solid #03d0ff;
+  }
+  // .el-table td,
+  // .el-table th.is-leaf {
+  //   // border-bottom: none;
+  //   // border-right: 1px solid #03d0ff;
+  // }
+  // .el-table th.is-leaf:last-child,
+  // .el-table--border th:nth-last-child(2) {
+  //   // border: none;
+  // }
+  .el-table thead {
+    background: #027dbc;
+  }
+  // .el-table thead tr th:last-child {
+  //   // border: none;
+  // }
+  .el-table::before,
+  .el-table--border::after {
+    background-color: transparent;
+  }
+  td.el-table_1_column_10 {
+    border-right: none !important;
+  }
+  .el-table .el-table__body-wrapper tr:nth-child(even) {
+    background: #2162a8;
+  }
+  .el-table__body-wrapper {
+    max-height: 320px;
+    overflow-y: scroll;
+  }
+  .personnelframe-pricker .el-cascader {
+    height: 30px;
+  }
+  .personnelframe-pricker .el-input__inner,
+  .personnelframe-pricker .el-input__inner:hover {
+    border: 1px solid #bcd9e8 !important;
+    font-size: 12px;
+    height: 30px;
+    line-height: 30px;
+  }
+  .el-cascader-node:not(.is-disabled):hover {
+    background: #91c1e7 !important;
+  }
+  .el-tree,
+  .el-tree-node__content:hover,
+  .el-tree-node:focus > .el-tree-node__content {
+    background: transparent;
+    color: #fff;
+  }
+  .el-tree-node__expand-icon {
+    color: #fff;
+  }
+  .el-table__body tr.current-row > td {
+    background: #025bff;
+  }
+  .el-breadcrumb__inner a,
+  .el-breadcrumb__inner.is-link {
+    color: #fff;
+    font-weight: normal;
+  }
+  .el-breadcrumb__item:last-child .el-breadcrumb__inner:hover {
+    color: #03d0ff;
+    cursor: default;
+  }
+  // 调动弹框
+  .personnelframe {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+  }
+
+  .personnelframe-close {
+    width: 100%;
+    height: 100%;
+    background: rgba($color: #000000, $alpha: 0.5);
+  }
+
+  .personnelframe-container {
+    width: 30%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .personnelframe-container-box {
+    background: #c7ecff;
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+    padding-bottom: 20px;
+  }
+
+  .personnelframe-title:last-child {
+    width: 100%;
+    font-size: 10px;
+    color: #333;
+    padding-top: 5px;
+    overflow-y: auto;
+    height: 60px;
+    border-top: 1px solid #beddee;
+    flex-direction: column;
+    div {
+      margin-bottom: 5px;
+      color: #a1aeb5;
+    }
+  }
+  .personnelframe-title::-webkit-scrollbar {
+    display: none;
+  }
+
+  .personnelframe-table {
+    width: 100%;
+    border: 1px solid #bcd9e8;
+    margin: 8px 0;
+
+    .personnelframe-table-tr {
+      border-bottom: 1px solid #bcd9e8;
+      width: 100%;
+      display: flex;
+      align-self: center;
+      .el-input__inner,
+      .el-input__inner:hover {
+        border: none;
+      }
+      .el-input__inner {
+        height: 26px;
+        line-height: 26px;
+        font-size: 12px;
+      }
+      .el-input__icon {
+        height: 26px;
+        line-height: 26px;
+        font-size: 12px;
+      }
+      .el-input__prefix,
+      .el-input__suffix {
+        top: 0;
+      }
+      .el-select {
+        width: 60%;
+      }
+    }
+    .personnelframe-table-tr > div {
+      width: 50%;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 12px;
+      color: #777e82;
+    }
+    .personnelframe-table-tr > div.el-textarea {
+      width: 100%;
+      height: 50px;
+      padding: 0;
+      .el-textarea__inner {
+        background: transparent;
+        border: none;
+        resize: none;
+      }
+    }
+    .personnelframe-table-tr > span {
+      width: 50%;
+      display: block;
+      padding: 6px 15px;
+      border-right: 1px solid #bcd9e8;
+      font-size: 12px;
+      color: #777e82;
+      box-sizing: border-box;
+      &:last-child {
+        border-right: 0;
+      }
+    }
+
+    .personnelframe-table-tr:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .personnelframe-btns {
+    width: 100%;
+    text-align: right;
+    margin-top: 12px;
+  }
+
+  .personnelframe-btns button {
+    font-size: 12px;
+  }
+
+  .treelist-box {
+    width: 100%;
+    height: 390px;
+    border: 1px solid #03d0ff;
+    overflow-y: auto;
+  }
+
+  //淡入淡出动画
+  .personnelframe-enter,
+  .personnelframe-leave-to {
+    opacity: 0;
+  }
+
+  .personnelframe-enter-to,
+  .personnelframe-leave {
+    opacity: 1;
+  }
+
+  .personnelframe-enter-active,
+  .personnelframe-leave-active {
+    transition: all 1s;
+  }
+}
+
+// 面包屑导航
+.navcrumbed {
+  width: 96%;
+  font-size: 15px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  line-height: 50px;
+  position: relative;
+  top: -25px;
+  left: 30px;
+  .navcrumbedimg {
+    display: inline-flex;
+    align-items: center;
+
+    img {
+      width: 25px;
+      height: 22px;
+      margin-right: 5px;
+    }
+  }
+}
+.ProblemStandBookPF {
+  width: 95%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  border: 1px solid #03d0ff;
+  box-shadow: 0 0 5px #03d0ff inset;
+  -webkit-box-shadow: 0 0 5px #03d0ff inset;
+  -moz-box-shadow: 0 0 5px #03d0ff inset;
+  -o-box-shadow: 0 0 0 5px #03d0ff inset;
+  position: relative;
+  color: #fff;
+  padding: 12px 10px;
+
+  .ProblemStandBookPFMain {
+    width: 100%;
+    box-sizing: border-box;
+
+    .searchBackLog {
+      display: flex;
+      flex: 1;
+      height: 100px;
+      margin: 10px auto 15px;
+      padding: 12px 20px;
+      box-sizing: border-box;
+      border: 1px solid #03d0ff;
+      box-shadow: 0 0 5px #03d0ff inset;
+      -webkit-box-shadow: 0 0 5px #03d0ff inset;
+      -moz-box-shadow: 0 0 5px #03d0ff inset;
+      -o-box-shadow: 0 0 5px #03d0ff inset;
+
+      .el-form {
+        flex: 5;
+      }
+
+      .searchBtnRight {
+        margin-top: 20px;
+        flex: 1;
+        display: flex;
+        height: 35px;
+
+        .el-button {
+          flex: 1;
+        }
+      }
+    }
+  }
+
+  .el-form-item__label {
+    color: #ffffff;
+  }
+
+  .el-input__inner {
+    color: #fff;
+    background: transparent;
+    border: 1px solid rgba(3, 208, 255, 0.7);
+  }
+
+  input::placeholder {
+    color: #fff;
+  }
+
+  .el-button--primary {
+    color: #fff;
+    background-color: #025bff;
+    border-color: #025bff;
+  }
+
+  .el-form {
+    margin-top: 15px;
+  }
+
+  .el-progress__text {
+    color: #fff;
+    font-size: 12px !important;
+  }
+
+  .el-progress-bar__outer {
+    background: #b9b9b9;
+  }
+}
+
+.el-select-dropdown__item {
+  height: 26px !important;
+  line-height: 26px !important;
+  font-size: 12px !important;
+}
+</style>

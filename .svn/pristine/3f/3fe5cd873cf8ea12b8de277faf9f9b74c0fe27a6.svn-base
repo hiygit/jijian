@@ -1,0 +1,231 @@
+.personnel {
+  * {
+    box-sizing: border-box;
+  }
+  .home_main {
+    height: 600px;
+  }
+
+  .homenav {
+    width: 96%;
+    height: 520px;
+    border: 1px solid #03D0FF;
+    box-shadow: 0 0 5px #03D0FF inset;
+    -webkit-box-shadow: 0 0 5px #03D0FF inset;
+    -moz-box-shadow: 0 0 5px #03D0FF inset;
+    -o-box-shadow: 0 0 5px #03D0FF inset;
+    padding: 14px 20px 20px;
+    text-align: center;
+    margin: 60px auto 0;
+  }
+
+  /* 设置滚动条的样式 */
+  ::-webkit-scrollbar {
+    width: 3px;
+    height: 5px;
+    background-color: #02468F;
+  }
+
+  /* 滚动槽 */
+  ::-webkit-scrollbar-track {
+    border-radius: 10px;
+  }
+
+  /* 滚动条滑块 */
+  ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #0965AE;
+  }
+
+  // 面包屑导航
+  .navcrumbed {
+    width: 96%;
+    margin: 30px 0 0;
+    font-size: 15px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    z-index: 2000;
+    .navcrumbedimg {
+      display: inline-flex;
+      align-items: center;
+
+      img {
+        width: 25px;
+        height: 22px;
+        margin-right: 5px;
+      }
+    }
+  }
+
+  // 搜索框
+  .searchform {
+    width: 96;
+    margin: 0 auto;
+    border: 1px solid #03D0FF;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mobilizeto {
+    color: #02468F;
+    text-decoration: none;
+  }
+
+  .searchbtn,
+  .searchbtn:hover {
+    background: #025BFF;
+    border: none;
+  }
+
+  .searchtree,
+  .searchtree:hover {
+    background: #029AFF;
+    border: none;
+  }
+
+  .addpersonnel,
+  .addpersonnel:hover {
+    background: #5CC8AD;
+    border: none;
+  }
+
+  .seacchtable {
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .seebtn,
+  .seebtn:hover {
+    background: transparent;
+    border: 1px solid #6692CB;
+    color: #F8FAFC;
+  }
+  // 调动弹框
+  .personnelframe {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+  }
+
+  .personnelframe-close {
+    width: 100%;
+    height: 100%;
+    background: rgba($color: #000000, $alpha: 0.5);
+  }
+
+  .personnelframe-container {
+    width: 30%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .personnelframe-container-box {
+    background: #C7ECFF;
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+    padding-bottom: 20px;
+  }
+
+  .personnelframe-title {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    font-size: 10px;
+    color: #333;
+    font-weight: 600;
+
+    img {
+      width: 18px;
+      height: 18px;
+      margin-right: 5px;
+    }
+
+    h3 {
+      position: relative;
+      top: -1px;
+    }
+  }
+  
+  .personnelframe-table {
+    width: 100%;
+    border: 1px solid #BCD9E8;
+    margin: 8px 0;
+
+    .personnelframe-table-tr {
+      border-bottom: 1px solid #BCD9E8;
+      width: 100%;
+      display: flex;
+      align-self: center;
+    }
+
+    .personnelframe-table-tr span {
+      flex: 1;
+      display: block;
+      padding: 6px 15px;
+      border-right: 1px solid #BCD9E8;
+      font-size: 10px;
+      color: #777E82;
+
+      &:last-child {
+        border-right: 0;
+      }
+    }
+
+    .personnelframe-table-tr:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .personnelframe-pricker {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    justify-content: space-between;
+  }
+  
+  .personnelframe-btns {
+    width: 100%;
+    text-align: right;
+    margin-top: 10px;
+  }
+
+  .personnelframe-btns button {
+    font-size: 10px;
+  }
+
+  .treelist-box {
+    width: 100%;
+    height: 390px;
+    border: 1px solid #03D0FF;
+    overflow-y: auto;
+  }
+
+  //淡入淡出动画
+  .personnelframe-enter,
+  .personnelframe-leave-to {
+    opacity: 0;
+  }
+
+  .personnelframe-enter-to,
+  .personnelframe-leave {
+    opacity: 1;
+  }
+
+  .personnelframe-enter-active,
+  .personnelframe-leave-active {
+    transition: all 1s;
+  }
+
+}

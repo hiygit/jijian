@@ -1,0 +1,1237 @@
+<template>
+  <div class="xiansuotaizhang">
+    <!-- 面包屑导航 -->
+    <div class="navcrumbed">
+      <div class="navcrumbedimg">
+        <router-link :to="{path: '/StandBook'}">
+          <img style="margin-top: 30px" src="@/assets/navblack.png" alt srcset />
+        </router-link>
+        <!-- <img src="@/assets/navblack.png" alt srcset /> -->
+        <span>当前位置：</span>
+      </div>
+      <div class="navcrumbedlist">
+        <el-breadcrumb separator-class="el-icon-arrow-right">
+          <el-breadcrumb-item :to="{ path: '/StandBook' }">线索台账</el-breadcrumb-item>
+          <el-breadcrumb-item>更新进度</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+    </div>
+    <div class="content home">
+      <div class="StandBookEnter">
+        <span class="border row1"></span>
+        <span class="border row2"></span>
+        <span class="border col1"></span>
+        <span class="border col2"></span>
+        <div class="StandBookEnterMain" style="display: flex">
+          <!-- 左侧 进程列表 -->
+          <div class="progressListLeftBox">
+            <div class="progressListLeftTop">
+              <div class="progressListbox">
+                <img src="../../assets/schedule.png" alt />
+                <span>进程列表</span>
+              </div>
+              <div class="topStepText">
+                <p class="texto steptexto" @click="leftget(0,proposedDispositionList[0].value)">
+                  <img src="../../assets/steponesel.png" v-if="step == 0" />
+                  <img src="../../assets/stepone.png" v-else />
+                  <span :class="step == 0 ? 'stepselspan':''">{{proposedDispositionList[0].label}}</span>
+                </p>
+                <p class="texto" :class="step >= 1 ?'steptexto':''" @click="leftget(1,proposedDispositionList[1].value)">
+                  <img src="../../assets/steptwosel.png" v-if="step == 1" />
+                  <img src="../../assets/steptwo.png" v-else />
+                  <span :class="step == 1 ? 'stepselspan':''">{{proposedDispositionList[1].label}}</span>
+                </p>
+                <p class="texto" :class="step >= 2 ?'steptexto':''" @click="leftget(2,proposedDispositionList[2].value)">
+                  <img src="../../assets/stepthreesel.png" v-if="step == 2" />
+                  <img src="../../assets/stepthree.png" v-else />
+                  <span :class="step == 2 ? 'stepselspan':''">问题线索处置</span>
+                </p>
+                <p class="texto" @click="leftget(3,proposedDispositionList[proposedDispositionList.length-2].value)">
+                  <img src="../../assets/stepfoursel.png" v-if="step == 3" />
+                  <img src="../../assets/stepfour.png" v-else />
+                  <span :class="step == 3 ? 'stepselspan':''">{{proposedDispositionList[proposedDispositionList.length-2].label}}</span>
+                </p>
+                <p class="texto lastTexto" @click="leftget(4,proposedDispositionList[proposedDispositionList.length-1].value)">
+                  <img src="../../assets/stepfivesel.png" v-if="step == 4" />
+                  <img src="../../assets/stepfive.png" v-else />
+                  <span :class="step == 4 ? 'stepselspan':''">{{proposedDispositionList[proposedDispositionList.length-1].label}}</span>
+                </p>
+              </div>
+            </div>
+            <!-- 上传附件记录 -->
+            <div class="progressListLeftbottom">
+              <div class="progressListbox">
+                <img src="../../assets/accessory.png" alt />
+                <span>上传附件记录</span>
+              </div>
+              <div class="accessoryBottom">
+                <div class="accessoryBottom-text" v-for="(item,index) in fileRecordList" :key="index">
+                  <div class="fujian">
+                    <p style="cursor: pointer;" @click="downLoad(item)"><span>{{(index+1 + '、')}}</span> {{item.file}}</p>
+                    <span v-show="fileBtn" @click="deleteFile(item)"><img src="../../assets/close.png" alt=""></span>
+                  </div>
+                  <p style="text-align: right;color: #CBD9E8">{{item.time}}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 右侧 详细进度 -->
+          <div class="progressListRightBox">
+            <div class="detailProgressTopBox">
+              <p>
+                <img src="../../assets/amend.png" alt />
+                <span>详细进度</span>
+              </p>
+              <!-- <button class="bottomBtnStyle" @click="saverecord">上传附件</button> -->
+              <div class="filesbtns">
+                <el-button size="small" type="primary">上传附件</el-button>
+                <input type="file" value="上传附件" class="filesbtns-input" multiple accept @change="headgetfile($event)" title=" " :disabled="ifupdata"/>
+              </div>
+            </div>
+            <!-- 详细进度下的tab切换 -->
+            <div class="detailTab">
+              <!-- 切换按钮 -->
+              <div class="tabButton" v-show="isShow">
+                <div class="tabButtonOne" @click="get(1,proposedDispositionList[2].value)">
+                  <div class="imgBoxx">
+                    <img v-if="pages==1" src="../../assets/img.png" alt />
+                    <img src="../../assets/img1.png" v-else alt />
+                  </div>
+                  <span :class="pages == 1 ? 'news':''">{{proposedDispositionList[2].label}}</span>
+                </div>
+                <div class="tabButtonOne" @click="get(2,proposedDispositionList[3].value)">
+                  <div class="imgBoxx">
+                    <img src="../../assets/img.png" v-if="pages==2" alt />
+                    <img src="../../assets/img1.png" v-else alt />
+                  </div>
+                  <span :class="pages == 2 ? 'news':''">{{proposedDispositionList[3].label}}</span>
+                </div>
+                <div class="tabButtonOne" @click="get(3,proposedDispositionList[4].value)">
+                  <div class="imgBoxx">
+                    <img src="../../assets/img.png" v-if="pages==3" alt />
+                    <img src="../../assets/img1.png" v-else alt />
+                  </div>
+                  <span :class="pages == 3 ? 'news':''">{{proposedDispositionList[4].label}}</span>
+                </div>
+                <div class="tabButtonOne" @click="get(4,proposedDispositionList[5].value)">
+                  <div class="imgBoxx">
+                    <img src="../../assets/img.png" v-if="pages==4" alt />
+                    <img src="../../assets/img1.png" v-else alt />
+                  </div>
+                  <span :class="pages == 4 ? 'news':''">{{proposedDispositionList[5].label}}</span>
+                </div>
+                <div class="tabButtonOne" @click="get(5,proposedDispositionList[6].value)">
+                  <div class="imgBoxx">
+                    <img src="../../assets/img.png" v-if="pages==5" alt />
+                    <img src="../../assets/img1.png" v-else alt />
+                  </div>
+                  <span :class="pages == 5 ? 'news':''">{{proposedDispositionList[6].label}}</span>
+                </div>
+                <div class="tabButtonOne" @click="get(6,proposedDispositionList[7].value)">
+                  <div class="imgBoxx">
+                    <img src="../../assets/img.png" v-if="pages==6" alt />
+                    <img src="../../assets/img1.png" v-else alt />
+                  </div>
+                  <span :class="pages == 6 ? 'news':''">{{proposedDispositionList[7].label}}</span>
+                </div>
+                <div class="tabButtonOne" @click="get(7,proposedDispositionList[8].value)">
+                  <div class="imgBoxx">
+                    <img src="../../assets/img.png" v-if="pages==7" alt />
+                    <img src="../../assets/img1.png" v-else alt />
+                  </div>
+                  <span :class="pages == 7 ? 'news':''">{{proposedDispositionList[8].label}}</span>
+                </div>
+                <div class="tabButtonOne" @click="get(8,proposedDispositionList[9].value)">
+                  <div class="imgBoxx">
+                    <img src="../../assets/img.png" v-if="pages==8" alt />
+                    <img src="../../assets/img1.png" v-else alt />
+                  </div>
+                  <span :class="pages == 8 ? 'news':''">{{proposedDispositionList[9].label}}</span>
+                </div>
+                <div class="tabButtonOne" @click="get(9,proposedDispositionList[10].value)">
+                  <div class="imgBoxx">
+                    <img src="../../assets/img.png" v-if="pages==9" alt />
+                    <img src="../../assets/img1.png" v-else alt />
+                  </div>
+                  <span :class="pages == 9 ? 'news':''">{{proposedDispositionList[10].label}}</span>
+                </div>
+                <div class="tabButtonOne" @click="get(10,proposedDispositionList[11].value)">
+                  <div class="imgBoxx">
+                    <img src="../../assets/img.png" v-if="pages==10" alt />
+                    <img src="../../assets/img1.png" v-else alt />
+                  </div>
+                  <span :class="pages == 10 ? 'news':''">{{proposedDispositionList[11].label}}</span>
+                </div>
+              </div>
+              <!-- 切换内容 -->
+              <div class="contentTabBox">
+                <textarea v-model="textareaContent" class="textareaContent" cols="30" rows="10" placeholder="请输入" :disabled="ifupdata"></textarea>
+              </div>
+            </div>
+            <!-- 按钮 -->
+            <div class="bottomButton" v-if="!ifupdata">
+              <button class="bottomBtnStyle" @click="personnelpops = true">下一步</button>
+              <button class="bottomBtnStyle" @click="saverecord">保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ========================================================================= -->
+    <!-- 下一步弹框 -->
+    <transition name="personnelframe">
+      <div class="personnelframe" v-if="personnelpops">
+        <div class="personnelframe-close"></div>
+        <div class="personnelframe-container">
+          <div class="personnelframe-container-box">
+            <div class="personnelframe-title">
+              <img src="@/assets/courseIcon.png" alt srcset />
+              <h3>进程更新</h3>
+            </div>
+            <div class="spanbox">
+              <span v-for="(item,index) in proposedDispositionList" :key="index" @click="nextspan=index" :class="nextspan == index ? 'lastspan':''">{{item.label}}</span>
+              <span style="padding: 17px 110px;opacity:0"></span>
+            </div>
+          </div>
+          <div class="personnelframe-btns">
+            <el-button type="primary" @click="personnelpops=false">取消</el-button>
+            <el-button type="warning" @click="submitchangeunit">确定</el-button>
+          </div>
+        </div>
+      </div>
+    </transition>
+    <!-- ========================================================================= -->
+  </div>
+</template>
+
+<script>
+import qs from "qs";
+export default {
+  name: "StandBookEnter",
+  inject: ['reload'],
+  data() {
+    return {
+      fileBtn:false,
+      textareaContent:"",//文本域内容
+      bianjiid:"",//可编辑id
+      ifupdata:"",//是否可以修改
+      filesarr: [], //上传文件name数组
+      fileList: [],
+      isdisable: false, //文本域内容是否可编辑
+      id: [],
+      isShow: false, //问题线索处置的子集 step=2时
+      personnelpops: false, //弹框显示切换
+      bodydisponsalWay: "", //处置方式
+      fileRecordList: [], //处置方式记录附件列表
+      content: [],
+      proposedDispositionList: [], //字典查询 问题线索处置的子集的
+      pages: 1,
+      step: null, //进度步骤
+      nextspan: 0, //下一步弹窗中span下标
+      alllistdata:[],//本地进度数据
+    };
+  },
+  created() {
+    document.title = "线索台账修改进度";
+    let that = this;
+    //处置意见
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + "web/dict",
+      data: { type: "disponsal_way" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      transformRequest: [
+        function(data) {
+          return qs.stringify(data);
+        }
+      ]
+    }).then(res => {
+      if (res.data.success && res.data.errorCode == "-1") {
+        this.proposedDispositionList = res.data.body.dictValueList;
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
+  },
+  mounted() {
+    let id = this.$route.query.id;
+    this.init();
+    this.ifupdata = this.$route.query.ifupdata?true:false
+  },
+  methods: {
+    // 个人中心Tab切换
+    get(e,val) {
+      if(this.ifupdata){
+        let that = this;
+        //从本地获取当前数据
+        let textlist = [];//内容数组
+        let preList = [];//文件数组
+        if(that.alllistdata.length > 0){
+          for(let i=0;i<that.alllistdata.length;i++){
+            if(val == that.alllistdata[i].disponsalWay){
+              if(that.alllistdata[i].content != ""){
+                textlist.push(that.alllistdata[i].content);
+              }else{
+                textlist.push("");
+              }
+              if(that.alllistdata[i].fileRecordList.length>0){
+                for(let j=0;j<that.alllistdata[i].fileRecordList.length;j++){
+                  let lists = that.alllistdata[i].fileRecordList[j];
+                  let obj = {
+                    file: lists.file,
+                    time: lists.time
+                  };
+                  preList.push(obj);
+                }
+              }else{
+                preList.push( );
+              }
+            }
+          }
+          that.fileRecordList = preList;
+          that.textareaContent = textlist.join("\n")
+        }
+        //请求后台对应当前数据
+        // let objs = {
+        //   disponsalWay:val,
+        //   userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+        //   cluesParameterId:this.$route.query.id
+        // };
+        // this.$ajax({
+        //   method: "POST",
+        //   url: that.globals.requesturl + "web/cluesparameter/details",
+        //   data: objs,
+        //   headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        //   transformRequest: [
+        //     function(data) {
+        //       return qs.stringify(data);
+        //     }
+        //   ]
+        // }).then(res => {
+        //   if (res.data.success && res.data.errorCode == "-1") {
+        //     if(res.data.body.detailList > 0){
+        //       let textlist = [];//内容数组
+        //       let arrlist = res.data.body.detailList;//返回值
+        //       let preList = [];//文件数组
+        //       for (let i = 0; i < arrlist.length; i++) {
+        //         textlist.push(arrlist[i].problemcluedisposalrecord.content);
+        //         if(arrlist[i].problemcluedisposalrecord.fileRecordList && arrlist[i].problemcluedisposalrecord.fileRecordList.length > 0){
+        //           for (let j = 0; j < arrlist[i].problemcluedisposalrecord.fileRecordList.length; j++) {
+        //             let lists = arrlist[i].problemcluedisposalrecord.fileRecordList[j];
+        //             let obj = {
+        //               file: lists.file,
+        //               time: lists.time
+        //             };
+        //             preList.push(obj);
+        //           }
+        //         }
+        //       }
+        //       that.fileRecordList = preList;
+        //       that.textareaContent = arrlist.join("\n")
+        //     }else{
+        //       that.textareaContent = ""
+        //       that.fileRecordList = []
+        //     }
+        //   } else {
+        //     this.$message.error(res.data.msg);
+        //   }
+        // });
+        this.pages = e;
+        // this.isShow = e == 2 ? true : false;
+      }
+    },
+    leftget(dex,val) {
+      if(this.ifupdata){
+        let that = this;
+        //从本地获取当前数据
+        let textlist = [];//内容数组
+        let preList = [];//文件数组
+        if(that.alllistdata.length > 0){
+          for(let i=0;i<that.alllistdata.length;i++){
+            if(val == that.alllistdata[i].disponsalWay){
+              if(that.alllistdata[i].content != ""){
+                textlist.push(that.alllistdata[i].content);
+              }else{
+                textlist.push("");
+              }
+              if(that.alllistdata[i].fileRecordList.length>0){
+                for(let j=0;j<that.alllistdata[i].fileRecordList.length;j++){
+                  let lists = that.alllistdata[i].fileRecordList[j];
+                  let obj = {
+                    file: lists.file,
+                    time: lists.time,
+                    id: lists.id
+                  };
+                  preList.push(obj);
+                }
+              }else{
+                preList.push( );
+              }
+            }
+          }
+          that.fileRecordList = preList;
+          that.textareaContent = textlist.join("\n")
+        }
+        //请求后台对应当前数据
+        // let objs = {
+        //   disponsalWay:val,
+        //   userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+        //   cluesParameterId:this.$route.query.id
+        // };
+        // this.$ajax({
+        //   method: "POST",
+        //   url: that.globals.requesturl + "web/cluesparameter/details",
+        //   data: objs,
+        //   headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        //   transformRequest: [
+        //     function(data) {
+        //       return qs.stringify(data);
+        //     }
+        //   ]
+        // }).then(res => {
+        //   if (res.data.success && res.data.errorCode == "-1") {
+        //     if(res.data.body.detailList.length > 0){
+        //       let textlist = [];//内容数组
+        //       let arrlist = res.data.body.detailList;//返回值
+        //       let preList = [];//文件数组
+        //       for (let i = 0; i < arrlist.length; i++) {
+        //         textlist.push(arrlist[i].problemcluedisposalrecord.content);
+        //         if(arrlist[i].problemcluedisposalrecord.fileRecordList && arrlist[i].problemcluedisposalrecord.fileRecordList.length > 0){
+        //           for (let j = 0; j < arrlist[i].problemcluedisposalrecord.fileRecordList.length; j++) {
+        //             let lists = arrlist[i].problemcluedisposalrecord.fileRecordList[j];
+        //             let obj = {
+        //               file: lists.file,
+        //               time: lists.time
+        //             };
+        //             preList.push(obj);
+        //           }
+        //         }
+        //       }
+        //       that.fileRecordList = preList;
+        //       that.textareaContent = textlist.join("\n")
+        //     }else{
+        //       that.textareaContent = ""
+        //       that.fileRecordList = []
+        //     }
+        //   } else {
+        //     this.$message.error(res.data.msg);
+        //   }
+        // });
+        this.step = dex;
+        this.isShow = dex == 2 ? true : false;
+      }
+    },
+    init() {
+      let that = this;
+      let objs = {
+        id: this.$route.query.id,
+        userId: JSON.parse(localStorage.getItem("userinfo")).isd,
+        cluesParameterChildrenId: this.$route.query.cluesParameterChildrenId
+      };
+      this.$ajax({
+        method: "POST",
+        url: that.globals.requesturl + "web/cluesparameter/record",
+        data: objs,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        transformRequest: [
+          function(data) {
+            return qs.stringify(data);
+          }
+        ]
+      }).then(res => {
+        if (res.data.success && res.data.errorCode == "-1") {
+          that.bodydisponsalWay = res.data.body.disponsalWay == "" ? 0:res.data.body.disponsalWay;//当前进度id
+          if (!res.data.body.disponsalWay) {
+            that.isShow = false;
+            that.step = 0;
+          } else if (res.data.body.disponsalWay == 0) {
+            that.step = 0;
+          } else if (res.data.body.disponsalWay == 1) {
+            that.step = 1;
+          } else if (
+            res.data.body.disponsalWay == 2 ||
+            res.data.body.disponsalWay == 3 ||
+            res.data.body.disponsalWay == 4 ||
+            res.data.body.disponsalWay == 5 ||
+            res.data.body.disponsalWay == 6 ||
+            res.data.body.disponsalWay == 7 ||
+            res.data.body.disponsalWay == 8 ||
+            res.data.body.disponsalWay == 9 ||
+            res.data.body.disponsalWay == 10 ||
+            res.data.body.disponsalWay == 11
+          ) {
+            that.step = 2;
+            this.isShow = true;
+            that.pages = res.data.body.disponsalWay-1
+          } else if (res.data.body.disponsalWay == 12) {
+            that.step = 3;
+          } else if (res.data.body.disponsalWay == 13) {
+            that.step = 4;
+          }
+        //新加-----
+          if(res.data.body.recordList.length > 0){
+            let arrlist = res.data.body.recordList;
+            that.alllistdata = arrlist;
+            for (let i = 0; i < arrlist.length; i++) {
+              if (arrlist[i].disponsalWay == res.data.body.disponsalWay) {
+                that.textareaContent = arrlist[i].content;
+                that.bianjiid = arrlist[i].id
+                let preList = [];
+                if(arrlist[i].fileRecordList.length > 0){
+                  for (let j = 0; j < arrlist[i].fileRecordList.length; j++) {
+                    let lists = arrlist[i].fileRecordList[j];
+                    if(lists.id == ""){
+                      that.fileBtn = false
+                    }else{
+                      that.fileBtn = true
+                    }
+                    let obj = {
+                      file: lists.file,
+                      time: lists.time,
+                      id: lists.id
+                    };
+                    preList.push(obj);
+                  }
+                  that.fileRecordList = preList;
+                }else{
+                  that.fileRecordList = preList;
+                }
+              }
+            }
+          }else{
+            that.textareaContent = ""//textarea内容
+          }
+        //新加-----
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    //保存
+    saverecord() {
+      console.log(this.$route.query.id)
+      let that = this;
+      let formdatas = new FormData();
+      formdatas.append("userId",JSON.parse(localStorage.getItem("userinfo")).isd);
+      formdatas.append("disponsalWay", that.bodydisponsalWay);
+      formdatas.append("cluesParameter.id", that.$route.query.id);
+      formdatas.append("content", that.textareaContent);
+      formdatas.append("id", that.bianjiid);
+      formdatas.append("cluesParameterChildrenId", this.$route.query.cluesParameterChildrenId);
+      console.log(that.filesarr)
+      if(that.filesarr.length > 0){
+        for (let i = 0; i < that.filesarr.length; i++) {
+          formdatas.append("files", that.filesarr[i]);
+        }
+      }
+      console.log(formdatas)
+      this.$ajax({
+        method: "post",
+        url: this.globals.requesturl + "web/cluesparameter/saveRecord",
+        data: formdatas,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        // transformRequest: [
+        //   function(data) {
+        //     return qs.stringify(data);
+        //   }
+        // ]
+      }).then(res => {
+        if (res.data.success && res.data.errorCode == "-1") {
+          this.fileList = [];
+          this.$message.success(res.data.msg);
+          this.personnelpops=false
+          console.log(this.$route.query.type)
+          this.$router.push({path:'/standBook'})
+
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    // 上传附件
+    headgetfile(event) {
+      let that = this;
+      that.filesarr = event.target.files;
+      let filelist = [];
+      for(let key in that.filesarr){
+        filelist.push({file:that.filesarr[key].name})
+      }
+      let newarr = filelist.splice(0,filelist.length-2)
+      that.fileRecordList = that.fileRecordList.concat(newarr)
+    },
+    // 下一步弹窗里的确定
+    submitchangeunit() {
+      console.log(this.$route.query.cluesParameterChildrenId)
+      console.log(this.nextspan)
+      if (this.nextspan < 2) {
+        this.step = this.nextspan;
+        console.log(this.step)
+        this.isShow = false;
+      } else if (this.nextspan > 11) {
+        console.log(this.nextspan)
+        this.step = this.nextspan == 12 ? 3 : this.nextspan == 13 ? 4 : "";
+        console.log(this.step)
+        this.isShow = false;
+      } else {
+        this.step = 2;
+        this.isShow = true;
+        this.pages = this.nextspan - 1;
+      }
+      let that = this;
+      let formdatas = new FormData();
+      console.log(that.$route.query.id)
+      formdatas.append("userId",JSON.parse(localStorage.getItem("userinfo")).isd);
+      formdatas.append("disponsalWay", that.bodydisponsalWay);
+      formdatas.append("cluesParameter.id", that.$route.query.id);
+      formdatas.append("content", that.textareaContent);
+      formdatas.append("dw", that.proposedDispositionList[that.nextspan].value);
+      formdatas.append("id", that.bianjiid);
+      formdatas.append("cluesParameterChildrenId",this.$route.query.cluesParameterChildrenId);
+      if(that.filesarr.length > 0){
+        for (let i = 0; i < that.filesarr.length; i++) {
+          formdatas.append("files", that.filesarr[i]);
+        }
+      }
+      this.$ajax({
+        method: "post",
+        url: this.globals.requesturl + "web/cluesparameter/saveRecord",
+        data: formdatas,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        // transformRequest: [
+        //   function(data) {
+        //     return qs.stringify(data);
+        //   }
+        // ]
+      }).then(res => {
+        if (res.data.success && res.data.errorCode == "-1") {
+          this.fileList = [];
+          this.$message.success(res.data.msg);
+          this.personnelpops=false
+          this.reload()
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    //下载附件
+    downLoad(item){
+      console.log(item)
+      console.log(item)
+      console.log(item.id)
+      let obbjstr = {
+        disposalFileRecordId: item.id,
+      }
+      console.log(obbjstr)
+      this.$ajax({
+        method: "POST",
+        url: this.globals.requesturl + 'web/cluesparameter/getFileStr',
+        data: obbjstr,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) {
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        console.log(res)
+        let url = res.data
+        let link = document.createElement('a')
+        link.style.display = 'none'
+        link.href = url
+        link.setAttribute('download', '')
+        document.body.appendChild(link)
+        link.click()
+        // this.$message.success(res.data.msg);
+        // if(res.data.errorCode == "-1"){
+        //     // let url = res.data.body.path
+        //     // let link = document.createElement('a')
+        //     // link.style.display = 'none'
+        //     // link.href = url
+        //     // link.setAttribute('download', '人员台账表')
+        //     // document.body.appendChild(link)
+        //     // link.click()
+        //     // this.$message.success(res.data.msg);
+        // }else{
+        //   this.$message.error(res.data.msg);
+        // }
+      })
+    },
+    deleteFile(item){
+      console.log(item.id)
+      let id = {
+        id: item.id,
+      }
+      this.$ajax({
+        method: "POST",
+        url: this.globals.requesturl + 'web/cluesparameter/deleteFile',
+        data: id,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) {
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if (res.data.success && res.data.errorCode == "-1") {
+          window.location.reload()
+          this.$message.success(res.data.msg);
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      })
+    }
+  }
+};
+</script>
+
+<style  lang="scss" scoped>
+* {
+  box-sizing: border-box;
+}
+.StandBookEnter {
+  width: 95%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  border: 1px solid #03d0ff;
+  box-shadow: 0 0 5px #03d0ff inset;
+  -webkit-box-shadow: 0 0 5px #03d0ff inset;
+  -moz-box-shadow: 0 0 5px #03d0ff inset;
+  -o-box-shadow: 0 0 0 5px #03d0ff inset;
+  position: relative;
+  color: #fff;
+  .StandBookEnterMain {
+    width: 100%;
+    box-sizing: border-box;
+    height: 520px;
+    overflow-y: auto;
+    position: relative;
+    // background: rgba(0, 0, 0, 0.3);
+    // 左侧 进程列表
+    .progressListLeftBox {
+      width: 26%;
+      height: 100%;
+      // padding: 20px;
+      border-right: 1px solid #03d0ff;
+      .progressListLeftTop {
+        width: 100%;
+        height: 350px;
+        padding: 20px;
+        box-sizing: border-box;
+        border-bottom: 1px solid #0278b8;
+        .progressListbox {
+          display: flex;
+          align-items: center;
+          font-size: 14px;
+          img {
+            width: 20px;
+            margin-right: 5px;
+          }
+        }
+
+        .topStepText {
+          line-height: 28px;
+          font-size: 16px;
+          padding: 20px 0;
+          // overflow: hidden;
+          .titleo {
+            width: 60px;
+            font-size: 16px;
+            float: left;
+          }
+
+          .texto {
+            // float: left;
+            font-size: 16px;
+            padding: 10px 0;
+            position: relative;
+            img {
+              float: left;
+              display: inline-block;
+              width: 20px;
+              margin-top: 8px;
+            }
+
+            span {
+              // float: left;
+              margin-left: 8px;
+            }
+            span.stepselspan {
+              color: #edb828;
+            }
+          }
+          .texto:after {
+            content: "";
+            width: 1px;
+            height: 30px;
+            border-left: 1px dashed #3c70a9;
+            position: absolute;
+            top: 35px;
+            left: 10px;
+          }
+          .texto:last-child:after {
+            display: none;
+          }
+          .texto:nth-child(6):after {
+            width: 80%;
+          }
+          p.steptexto::after {
+            border-left: 1px dashed #94703f;
+          }
+          p.steptexto:last-child::after {
+            display: none;
+          }
+        }
+      }
+      .progressListLeftbottom {
+        width: 100%;
+        height: 170px;
+        padding: 20px;
+        // background: #ccc;
+        .progressListbox {
+          display: flex;
+          align-items: center;
+          font-size: 14px;
+          img {
+            width: 20px;
+            margin-right: 5px;
+          }
+        }
+        .accessoryBottom {
+          width: 100%;
+          height: 130px;
+          padding: 10px 0;
+          padding-right: 10px;
+          overflow: hidden;
+          overflow-y: auto;
+          // background: rgba(0, 0, 0, 0.3);
+          .accessoryBottom-text {
+            line-height: 20px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            .fujian{
+              width: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              span{
+                display: inline-block;
+                width: 15px;
+                height: 15px;
+                cursor: pointer;
+                img{
+                  width: 100%;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // 右侧 详细进度
+    .progressListRightBox {
+      width: 74%;
+      height: 100%;
+      // background: rgba(0, 0, 0, 0.3);
+      .detailProgressTopBox {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px;
+        border-bottom: 1px solid #025fa3;
+        p {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 14px;
+          img {
+            width: 20px;
+            margin-right: 5px;
+          }
+        }
+        button {
+          width: 80px;
+          height: 35px;
+          line-height: 1;
+          text-align: center;
+          color: #fff;
+          font-size: 14px;
+          background: #029aff;
+          border: none;
+          border-radius: 3px;
+          float: right;
+          cursor: pointer;
+          margin-left: 70px;
+        }
+      }
+      // 详细进度下的tab切换
+      .detailTab {
+        width: 100%;
+        height: 400px;
+        // background: rgba(0, 0, 0, 0.3);
+        .tabButton {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          // height: 45px;
+          padding: 15px 10px;
+          .tabButtonOne {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 16px;
+            .imgBoxx {
+              width: 20px;
+              height: 16px;
+              margin-right: 5px;
+              position: relative;
+              // background: #ccc;
+              img {
+                width: 20px;
+              }
+            }
+            span.news {
+              color: #edb828;
+            }
+          }
+        }
+
+        // content内容
+        .contentTabBox {
+          width: 100%;
+          height: 340px;
+          .textareaContent {
+            resize: none;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            font-size: 16px;
+            // background: none;
+            background: rgba(0, 0, 0, 0.1);
+            outline: none;
+            border: none;
+            color: #fff;
+          }
+          .contentOneBox {
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            overflow-y: auto;
+            // background: rgba(0, 0, 0, 0.3);
+            .talkbox {
+              font-size: 14px;
+              line-height: 23px;
+              margin-bottom: 15px;
+              input {
+                width: 65px;
+                outline: none;
+                border: none;
+                background: none;
+                border-bottom: 1px solid #fff;
+                color: #fff;
+                font-size: 14px;
+                text-align: center;
+              }
+            }
+            .talkbox:last-child {
+              margin-bottom: 0;
+            }
+          }
+        }
+      }
+
+      .bottomButton {
+        width: 100%;
+        // height: 64px;
+        padding: 15px 10px;
+        border-top: 1px solid #03d0ff;
+        .bottomBtnStyle {
+          width: 100px;
+          height: 35px;
+          line-height: 35px;
+          text-align: center;
+          color: #fff;
+          font-size: 14px;
+          background: #e08801;
+          border: none;
+          border-radius: 3px;
+          float: right;
+          cursor: pointer;
+          margin-left: 70px;
+        }
+      }
+      .bottomButton button:last-child {
+        background: #029aff;
+      }
+    }
+  }
+
+  // ========================================================
+  // .personnellist {
+  .filesbtns {
+    position: relative;
+    cursor: pointer;
+  }
+  .filesbtns-input {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .el-breadcrumb__inner {
+    color: #fff;
+  }
+  .el-breadcrumb__item:last-child .el-breadcrumb__inner {
+    color: #03d0ff;
+  }
+  .el-form--inline .el-form-item {
+    margin-bottom: 0;
+  }
+  .el-form-item__label {
+    color: #fff;
+  }
+  .el-input__inner,
+  .el-input__inner:hover {
+    background: transparent;
+    border: 1px solid #016cae;
+  }
+  .el-table,
+  .el-table__expanded-cell,
+  .el-table th,
+  .el-table tr,
+  .el-table th:hover,
+  .el-table tr:hover,
+  .el-table--enable-row-hover .el-table__body tr:hover > td {
+    background: transparent;
+  }
+  .el-table thead,
+  .el-table {
+    color: #fff;
+  }
+  .el-table th {
+    text-align: center;
+  }
+  .el-table .cell {
+    text-align: center;
+  }
+  .el-table--border {
+    border: 1px solid #03d0ff;
+  }
+  .el-table td,
+  .el-table th.is-leaf {
+    border-bottom: none;
+    border-right: 1px solid #03d0ff;
+  }
+  .el-table th.is-leaf:last-child,
+  .el-table--border th:nth-last-child(2) {
+    border: none;
+  }
+  .el-table thead {
+    background: #027dbc;
+  }
+  .el-table thead tr th:last-child {
+    border: none;
+  }
+  .el-table::before,
+  .el-table--border::after {
+    background-color: transparent;
+  }
+  td.el-table_1_column_10 {
+    border-right: none !important;
+  }
+  .el-table .el-table__body-wrapper tr:nth-child(even) {
+    background: #2162a8;
+  }
+  .el-table__body-wrapper {
+    max-height: 320px;
+    overflow-y: scroll;
+  }
+  .personnelframe-pricker .el-cascader {
+    height: 30px;
+  }
+  .personnelframe-pricker .el-input__inner,
+  .personnelframe-pricker .el-input__inner:hover {
+    border: 1px solid #bcd9e8 !important;
+    font-size: 10px;
+    height: 30px;
+    line-height: 30px;
+  }
+  .el-cascader-node:not(.is-disabled):hover {
+    background: #91c1e7 !important;
+  }
+  .el-tree,
+  .el-tree-node__content:hover,
+  .el-tree-node:focus > .el-tree-node__content {
+    background: transparent;
+    color: #fff;
+  }
+  .el-tree-node__expand-icon {
+    color: #fff;
+  }
+  .el-table__body tr.current-row > td {
+    background: #025bff;
+  }
+  .el-breadcrumb__inner a,
+  .el-breadcrumb__inner.is-link,
+  .el-breadcrumb__inner a:hover,
+  .el-breadcrumb__inner.is-link:hover {
+    color: #fff;
+    font-weight: normal;
+  }
+  .personnelframe-pricker > .el-input {
+    width: 50%;
+  }
+}
+.el-cascader-panel {
+  font-size: 10px !important;
+}
+.el-cascader-menu__wrap::-webkit-scrollbar {
+  background: #fff !important;
+  height: 8px;
+}
+
+// 调动弹框
+.personnelframe {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2000;
+}
+
+.personnelframe-close {
+  width: 100%;
+  height: 100%;
+  background: rgba($color: #000000, $alpha: 0.5);
+}
+
+.personnelframe-container {
+  width: 30%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.personnelframe-container-box {
+  background: #c7ecff;
+  border-radius: 5px;
+  padding: 10px;
+  width: 100%;
+  padding-bottom: 20px;
+}
+
+.personnelframe-title {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 15px;
+
+  img {
+    width: 18px;
+    height: 18px;
+    margin-right: 5px;
+  }
+
+  h3 {
+    position: relative;
+    top: -1px;
+  }
+}
+.spanbox {
+  width: 100%;
+  padding: 15px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  span {
+    display: block;
+    color: #fff;
+    padding: 7px 23px;
+    background: #014890;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .lastspan {
+    background: #e08801;
+  }
+}
+
+.personnelframe-table {
+  width: 100%;
+  border: 1px solid #bcd9e8;
+  margin: 8px 0;
+
+  .personnelframe-table-tr {
+    border-bottom: 1px solid #bcd9e8;
+    width: 100%;
+    display: flex;
+    align-self: center;
+  }
+
+  .personnelframe-table-tr span {
+    flex: 1;
+    display: block;
+    padding: 6px 15px;
+    border-right: 1px solid #bcd9e8;
+    font-size: 10px;
+    color: #777e82;
+
+    &:last-child {
+      border-right: 0;
+    }
+  }
+
+  .personnelframe-table-tr:last-child {
+    border-bottom: none;
+  }
+}
+
+.personnelframe-pricker {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  justify-content: space-between;
+}
+
+.personnelframe-btns {
+  width: 100%;
+  text-align: right;
+  margin-top: 10px;
+}
+
+.personnelframe-btns button {
+  font-size: 10px;
+}
+
+.treelist-box {
+  width: 100%;
+  height: 390px;
+  border: 1px solid #03d0ff;
+  overflow-y: auto;
+}
+
+//淡入淡出动画
+.personnelframe-enter,
+.personnelframe-leave-to {
+  opacity: 0;
+}
+
+.personnelframe-enter-to,
+.personnelframe-leave {
+  opacity: 1;
+}
+
+.personnelframe-enter-active,
+.personnelframe-leave-active {
+  transition: all 1s;
+}
+</style>

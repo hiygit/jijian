@@ -1,0 +1,88 @@
+.login{
+    background: url(./../../assets/loginback.png) no-repeat repeat;
+    background-size: 1280px, 720px;
+    height: 100%;
+    // 头部标题
+    .login_header{
+        padding-top: 132px;
+        overflow: hidden;
+        width: 730px;
+        margin: 0 auto;
+        .login_header_text{
+            margin: 0 33px;
+            width: 288px;
+            height: 37px;
+            color: rgba(255, 255, 255, 1);
+            font-size: 26px;
+            text-align: center;
+        }
+        .login_header_img{
+            width: 188px;
+            height: 37px;
+            line-height: 37px;
+            img{
+                width: 100%;
+                height: 4px;
+                display: inline-block;
+                vertical-align: middle;
+            }
+        }
+        
+    }
+    // 登录 部分
+    .login_center{
+        // 背景图
+        background: url(./../../assets/loginbox.png) no-repeat;
+        background-size: 405px 278px;
+        height: 278px;
+        width: 405px;
+        margin: 41px auto 0;
+        // 登录数据
+        .login_center_text{
+            text-align: left;
+            width: 318px;
+            height: 20px;
+            color: rgba(255, 255, 255, 1);
+            font-size: 14px;
+            padding-left: 86px;
+            padding-top: 53px;
+        }
+        // 登录账号/密码
+        .login_center_text_admin{
+            overflow: hidden;
+            margin-top: 19px;
+            text-align: left;
+            img{
+                width: 30px;
+                height: 30px;
+            }
+            input{
+                width: 186px;
+                height: 27.5px;
+                margin-top: 1px;
+                background: #0A458B;
+                border: none;
+                color: #fff;
+                font-size: 14px;
+                padding-left: 10px;
+            }
+        }
+        // 登录按钮
+        .login_center_text_btn{
+            text-align: right;
+            width: 226px;
+            padding-top: 25px;
+            .login_center_text_btn_btn{
+                width: 88px;
+                height: 30px;
+                background:#0377C7;
+                border: none;
+                left: 695px;
+                color: rgba(255, 255, 255, 1);
+                font-size: 14px;
+                text-align: center;
+                letter-spacing: 1px;
+            }
+        }
+    }
+}

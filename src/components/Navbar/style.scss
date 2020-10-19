@@ -1,0 +1,27 @@
+.navbar{
+    padding: 12px 84px 8px;
+    overflow: hidden;
+    p{
+        cursor:pointer ;
+        width: 104px;
+        height: 33px;
+        color: rgba(255, 255, 255, 1);
+        font-size: 18px;
+        text-align: center;
+        margin: 0;
+        margin-right: 97px;
+        line-height: 33px;
+        letter-spacing: 2px;
+        position: relative;
+    }
+    p:nth-child(2){
+        margin-right: 480px;
+    }
+    p:nth-child(4){
+        margin-right: 0;
+    }
+    // 选中后的颜色
+    .navhover{
+        border: 1px solid rgba(3, 208, 255, 1);
+    }
+}

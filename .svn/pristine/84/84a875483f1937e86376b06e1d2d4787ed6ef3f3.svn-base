@@ -1,0 +1,5 @@
+const admin = 'http://o2o.wxlljd.com/admin/long'
+export const HOME_LIST = 'http://datainfo.duapp.com/shopdata/getGoods.php'
+export const KIND_LIST = admin + '/shopinfo?shopclassid=38&status=1'
+export const KIND_LEFT_LIST = admin + '/classinfo?status=1'
+export const KIND_RIGHT_LIST = admin + '/modity?shelf=1'

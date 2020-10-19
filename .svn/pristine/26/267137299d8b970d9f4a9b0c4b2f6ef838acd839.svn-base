@@ -1,0 +1,9 @@
+.gendetecharts{
+    width: 450px;
+    height: 190px;
+    padding-top: 10px;
+    .gendetecharts_echarts{
+        width: 900px;
+        height: 200px;
+    }
+}

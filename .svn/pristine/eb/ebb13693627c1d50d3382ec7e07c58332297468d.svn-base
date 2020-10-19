@@ -1,0 +1,644 @@
+<template>
+  <div class="content home">
+    <Navbar :navtabActive="4" />
+    <div class="ProblemStandBook" v-loading="loading">
+      <span class="border row1"></span>
+      <span class="border row2"></span>
+      <span class="border col1"></span>
+      <span class="border col2"></span>
+      <!-- 上面数据展示 -->
+      <div class="showDataList">
+        <div class="homemain topData">
+          <div class="topDataLeft" style="border-right:1px solid #03D0FF">
+            <el-carousel :autoplay="false" arrow="always" :loop="false">
+              <!-- 第一页 -->
+              <el-carousel-item class="homemain_page" v-for="(items,indexs) in tablist" :key="indexs">
+                <div class="rows">
+                  <div @click="handleSearchTable(indexs,index,item)" style="display:flex;width:100%;" v-for="(item,index) in items" :key="index">
+                    <img :src="isChoose==indexs+index?imglist[index].srcActive:imglist[index].src" class="dataMediaImg" />
+                    <div class="dataMediatext" style="flex:1;height:80px;padding:5px 10px">
+                      <p class="mediaTextTitle" style="height:65px;">{{item.kind}}</p>
+                      <p class="mediaTextData">{{item.number}}<span>件</span></p>
+                    </div>
+                  </div>
+                </div>
+              </el-carousel-item>
+            </el-carousel>
+          </div>
+          <div class="topDataRight">
+            <div class="topDataRightLine">
+              <span class="topDataRightLable">录入:</span>
+              <button class="topDataRightBtn" @click="goLink('/problemstandbook/enter')">问题台账录入</button>
+            </div>
+            <div class="topDataRightLine">
+              <span class="topDataRightLable">跟踪:</span>
+              <button class="topDataRightBtn" @click="goLink('/problemstandBook/pointfollow')">承担重点工作进度</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 表格内容 -->
+      <div class="showDataTable">
+        <div class="formSearch">
+          <span>查找：</span>
+          <input class="searchTableInp" placeholder="关键字查找" v-model="keyworktext"/>
+          <div style="display:inline-block;margin-right:20px">
+            <span style="color:#fff;font-size:18px">时间：</span>
+            <el-date-picker class="addTime" v-model="startDate" type="date" placeholder="请选择开始时间" format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
+            <el-date-picker class="addTime" v-model="endDate" type="date" placeholder="请选择结束时间" format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
+          </div>
+          <button class="searchTableBtn" style="background:#025BFF;margin-right:15px;" @click="searckkeyword">
+            <span class="el-icon-search" style="margin-right:5px;"></span>查询
+          </button>
+          <button class="searchTableBtn" style="background:#029aFF;" @click="exportbtn">导出</button>
+        </div>
+        <el-table v-loading="loading1" :data="tableData" border :height="tableHeight" stripe style="background-color:transparent" :cell-style="cellStyle" :header-cell-style="headerCellStyle">
+          <el-table-column :resizable="false" label="序号" type="index" :index="indexMethod" width="120"></el-table-column>
+          <el-table-column :resizable="false" label="时间" prop="date" width="260"></el-table-column>
+          <el-table-column :resizable="false" label="问题来源" prop="source"></el-table-column>
+          <el-table-column :resizable="false" label="问题类型" prop="types"></el-table-column>
+          <el-table-column :resizable="false" label="单位名称" prop="unitname"></el-table-column>
+          <el-table-column :resizable="false" label="级别" prop="rnak"></el-table-column>
+          <el-table-column :resizable="false" label="姓名" prop="names"></el-table-column>
+          <el-table-column :resizable="false" label="操作" width="280">
+            <template slot-scope="scope">
+              <el-button type="primary" size="mini" @click="handleEdit(scope.$index, scope.row)">查看</el-button>
+              <el-button type="primary" size="mini" @click="updatabtn(scope.$index, scope.row)">修改</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import qs from 'qs'
+import Navbar from "@/components/Navbar/index.vue";
+export default {
+  name: "problemstandbook",
+  components: {
+    Navbar
+  },
+  data() {
+    return {
+      loading:true,
+      loading1:true,
+      startDate:"",//开始时间
+      endDate:"",//结束时间
+
+      tablist:[],//选项列表
+      keyworktext:"",//关键字查找
+      tableData: [],//表格数据
+      //表格高度
+      tableHeight: "38vh",
+      isChoose: null,
+      //图片数组
+      imglist:[
+        {src: require("../../assets/talk.png"),srcActive: require("../../assets/talkActive.png")},
+        {src: require("../../assets/check.png"),srcActive: require("../../assets/checkActive.png")},
+        {src: require("../../assets/search.png"),srcActive: require("../../assets/searchActive.png")},
+        {src: require("../../assets/over.png"),srcActive: require("../../assets/overActive.png")},
+      ],
+      page:1,//第几页
+      pagesize:20,//每页显示条数
+      sourcelist:[],//问题来源
+      rnaklist:[],//问题级别
+      typeslist:[],//问题类型
+    };
+  },
+  created() {
+    document.title = "问题台账";
+    //问题来源
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + 'web/dict',
+      data: {type:'problem_sources'},
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      transformRequest: [function (data) {
+        return qs.stringify(data)
+      }]
+    }).then(res=>{
+      if(res.data.success && res.data.errorCode == '-1'){
+        this.sourcelist = res.data.body.dictValueList
+      }else{
+        this.$message.error(res.data.msg);
+      }
+    })
+    //问题级别
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + 'web/dict',
+      data: {type:'job_level'},
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      transformRequest: [function (data) {
+        return qs.stringify(data)
+      }]
+    }).then(res=>{
+      if(res.data.success && res.data.errorCode == '-1'){
+        this.rnaklist = res.data.body.dictValueList
+      }else{
+        this.$message.error(res.data.msg);
+      }
+    })
+    //问题类型
+    this.$ajax({
+      method: "POST",
+      url: this.globals.requesturl + 'web/dict',
+      data: {type:'problem_type'},
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      transformRequest: [function (data) {
+        return qs.stringify(data)
+      }]
+    }).then(res=>{
+      if(res.data.success && res.data.errorCode == '-1'){
+        this.typeslist = res.data.body.dictValueList
+      }else{
+        this.$message.error(res.data.msg);
+      }
+    })
+  },
+  mounted(){
+    let objs = {
+      userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+      pageNo:this.page,
+      pageSize:this.pagesize,
+      problemKind:""
+    }
+    this.init(objs);
+  },
+  methods: {
+    // 初始化
+    init(objs){
+      let that = this
+      this.$ajax({
+        method: "POST",
+        url: that.globals.requesturl + 'web/problemsofparameter/index',
+        data: objs,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        transformRequest: [function (data) {
+          return qs.stringify(data)
+        }]
+      }).then(res=>{
+        if(res.data.success && res.data.errorCode == -1){
+           that.loading=false
+           that.loading1=false
+          //选项卡
+          if(res.data.body.problemKindList.length>0){
+            let num = parseInt(res.data.body.problemKindList.length / 4);
+            for(let a=0;a<num;a++){
+              let arrs = [];
+              for(let l=a*4;l<4;l++){
+                let tabitem = res.data.body.problemKindList[l];
+                arrs.push(tabitem)
+              }
+              that.tablist.push(arrs)
+            }
+            let surplus = [];
+            for(let s=num*4;s<res.data.body.problemKindList.length;s++){
+              let tabitems = res.data.body.problemKindList[s];
+              surplus.push(tabitems)
+            }
+            that.tablist.push(surplus)
+          }
+          //表格列表
+          let listarr = [];
+          for(let i = 0;i<res.data.body.problemsOfParameterList.length;i++){
+            let strobj = res.data.body.problemsOfParameterList[i];
+            let obj = {};
+            obj.date = strobj.createDate
+            obj.names = strobj.name
+            if(strobj.companyName){
+              obj.unitname = strobj.companyNameStr
+              // obj.unitname = strobj.companyName.name
+            }
+            obj.id = strobj.id
+            for(let s=0;s<that.sourcelist.length;s++){
+              if(that.sourcelist[s].value == strobj.problemSources){
+                obj.source = that.sourcelist[s].label
+              }
+            }
+            for(let r=0;r<that.rnaklist.length;r++){
+              if(that.rnaklist[r].value == strobj.jobLevel){
+                obj.rnak = that.rnaklist[r].label
+              }
+            }
+            for(let t=0;t<that.typeslist.length;t++){
+              if(that.typeslist[t].value == strobj.problemType){
+                obj.types = that.typeslist[t].label
+              }
+            }
+            listarr.push(obj)
+          }
+          that.tableData = listarr
+        }else{
+          this.$message.error(res.data.msg);
+        }
+      })
+    },
+    //关键字查找
+    searckkeyword(){
+      let that = this
+      that.loading1=true
+      let dateStart = new Date(that.startDate)
+      let time1 = dateStart.getTime() // 开始时间-转为时间戳
+      let dateEnd = new Date(that.endDate)
+      let time2 = dateEnd.getTime() // 开始时间-转为时间戳
+      console.log(time1)
+      console.log(time2)
+      let objs = {
+        userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+        keyword:this.keyworktext,
+        startDate:that.startDate,
+        endDate:that.endDate
+      }
+      if(that.startDate == ""){
+        this.$message.error("请选择开始时间");
+      }else if(that.endDate == ""){
+        this.$message.error("请选择结束时间");
+      }else if(time1 == ""){
+        this.$message.error("请选择开始时间");
+      }else if(time2== ""){
+        this.$message.error("请选择结束时间");
+      }else if(time2 < time1){
+        this.$message.error("开始时间不得大于结束时间");
+      }else{
+        this.$ajax({
+          method:"POST",
+          url: that.globals.requesturl + 'web/problemsofparameter/solrSelect',
+          data: objs,
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          transformRequest: [function (data) {
+            return qs.stringify(data)
+          }]
+        }).then(res=>{
+          if(res.data.success && res.data.errorCode == '-1'){
+            that.loading1=false
+            let listarr = [];
+            for(let w=0;w<res.data.body.list.length;w++){
+              for(let i = 0;i<res.data.body.list[w].problemsOfParameterList.length;i++){
+                let strobj = res.data.body.list[w].problemsOfParameterList[i];
+                let obj = {};
+                obj.date = strobj.createDate
+                obj.names = strobj.name
+                obj.unitname = strobj.companyNameStr
+                // obj.unitname = strobj.companyName.name
+                for(let s=0;s<that.sourcelist.length;s++){
+                  if(that.sourcelist[s].value == strobj.problemSources){
+                    obj.source = that.sourcelist[s].label
+                  }
+                }
+                for(let r=0;r<that.rnaklist.length;r++){
+                  if(that.rnaklist[r].value == strobj.jobLevel){
+                    obj.rnak = that.rnaklist[r].label
+                  }
+                }
+                for(let t=0;t<that.typeslist.length;t++){
+                  if(that.typeslist[t].value == strobj.problemType){
+                    obj.types = that.typeslist[t].label
+                  }
+                }
+                listarr.push(obj)
+              }
+            }
+            that.tableData = listarr
+          }else{
+            this.$message.error(res.data.msg);
+          }
+        })
+      }
+    },
+    //导出数据
+    exportbtn(){
+      let that=this,ids=[];
+      if(that.tableData.length == 0){
+        this.$message.error("暂无数据");
+      }else{
+        that.tableData.map(function(list){
+          ids.push(list.id)
+        })
+        let obbjstr = {
+          ids:ids.join(),
+          userId:JSON.parse(localStorage.getItem('userinfo')).isd,
+        }
+        this.$ajax({
+          method: "POST",
+          url: this.globals.requesturl + 'web/problemsofparameter/export',
+          data: obbjstr,
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          transformRequest: [function (data) {
+            return qs.stringify(data)
+          }]
+        }).then(res=>{
+          if(res.data.errorCode == "-1"){
+            let url = res.data.body.path
+            let link = document.createElement('a')
+            link.style.display = 'none'
+            link.href = url
+            link.setAttribute('download', '人员台账表')
+            document.body.appendChild(link)
+            link.click()
+            this.$message.success(res.data.msg);
+          }else{
+            this.$message.error(res.data.msg);
+          }
+        })
+      }
+    },
+    //下标处理
+    indexMethod(index){
+      return index+1>9?index+1:'0'+(index+1)
+    },
+    //表格内容的切换
+    handleSearchTable(indexs,index,item) {
+      this.isChoose = indexs+index;
+      let objs = {
+        userId: JSON.parse(localStorage.getItem('userinfo')).isd,
+        pageNo:this.page,
+        pageSize:this.pagesize,
+        problemKind:item.problemKind
+      }
+      this.init(objs);
+    },
+    // 表格样式的处理
+    cellStyle({ row, column, rowIndex, columnIndex }) {
+      //基数偶数延时不同
+      if (rowIndex % 2 != 0) {
+        return {
+          "background-color": "#2162A8",
+          "text-align": "center",
+          color: "#fff",
+          "font-weight": "normal",
+          padding: "5px 0"
+        };
+      } else {
+        return {
+          "background-color": "#02468F",
+          "text-align": "center",
+          color: "#fff",
+          "font-weight": "normal",
+          padding: "5px 0"
+        };
+      }
+    },
+    headerCellStyle({ row, rowIndex }) {
+      return {
+        "background-color": "#027DBC",
+        "text-align": "center",
+        color: "#fff",
+        "font-weight": "normal",
+        "font-size": "16px"
+      };
+    },
+    // 页面跳转
+    goLink(e) {
+      this.$router.push({ path: e });
+    },
+    //查看
+    handleEdit(row){
+      let id = this.tableData[row].id
+      this.$router.push({ path: '/problemstandbook/enter',query:{id:id,look:1}});
+    },
+    //修改
+    updatabtn(index){
+      let id = this.tableData[index].id
+      this.$router.push({path: "/problemstandbook/enter",query: {id: id,}});
+    },
+  }
+};
+</script>
+
+<style lang="scss" scoped>
+.ProblemStandBook {
+  width: 95%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  border: 1px solid #03d0ff;
+  box-shadow: 0 0 5px #03d0ff inset;
+  -webkit-box-shadow: 0 0 5px #03d0ff inset;
+  -moz-box-shadow: 0 0 5px #03d0ff inset;
+  -o-box-shadow: 0 0 0 5px #03d0ff inset;
+  position: relative;
+  padding: 12px 10px;
+  ::-webkit-scrollbar {
+      display: none;
+  }
+  .showDataList {
+    width: 100%;
+    height: 150px;
+    margin: 10px auto 15px;
+    box-sizing: border-box;
+    border: 1px solid #03d0ff;
+    box-shadow: 0 0 5px #03d0ff inset;
+    -webkit-box-shadow: 0 0 5px #03d0ff inset;
+    -moz-box-shadow: 0 0 5px #03d0ff inset;
+    -o-box-shadow: 0 0 5px #03d0ff inset;
+    position: relative;
+    padding: 12px 10px;
+
+    .topData {
+      width: 100%;
+      height: 130px;
+      display: flex;
+      justify-content: space-around;
+      position: absolute;
+      left: 5px;
+      top: 10px;
+      box-sizing: border-box;
+
+      // 幻灯片
+      .homemain_page {
+        padding: 0px 20px;
+        overflow: hidden;
+
+        .dataMediaImg {
+          display: block;
+          width: 80px;
+          height: 80px;
+          float: left;
+        }
+
+        .mediaTextTitle {
+          width: 100%;
+          font-size: 15px;
+          line-height: 22px;
+          color: #fff;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+        }
+
+        .mediaTextData {
+          font-size: 24px;
+          color: #fff;
+          font-weight: bold;
+          margin-top: 3px;
+        }
+
+        .mediaTextData span {
+          font-size: 12px;
+          margin-left: 8px;
+          color: #fff;
+          font-weight: normal;
+        }
+
+        .homemain_page_item {
+          width: 450px;
+          height: 228px;
+          border: 1px solid #03d0ff;
+          box-shadow: 0 0 5px #03d0ff inset;
+          -webkit-box-shadow: 0 0 5px #03d0ff inset;
+          -moz-box-shadow: 0 0 5px #03d0ff inset;
+          -o-box-shadow: 0 0 5px #03d0ff inset;
+          position: relative;
+          float: left;
+          padding: 12px 10px;
+
+          // 头部
+          .homemain_page_item_header {
+            height: 24px;
+            line-height: 24px;
+            vertical-align: middle;
+            position: relative;
+
+            img {
+              width: 22px;
+              height: 19px;
+              position: relative;
+              top: 50%;
+              margin-top: -9px;
+            }
+
+            .homemain_page_item_header_text {
+              padding-left: 8px;
+              font-size: 14px;
+              color: #fff;
+            }
+          }
+        }
+
+        // 四个盒子下面的margin
+        .homemain_page_item1 {
+          margin-top: 2px;
+          margin-bottom: 22px;
+        }
+
+        // 四个盒子右边的margin
+        .homemain_page_item2 {
+          margin-right: 21px;
+        }
+      }
+
+      .topDataLeft {
+        flex: 5;
+        box-sizing: border-box;
+        padding: 20px;
+      }
+
+      .topDataRight {
+        flex: 1;
+        box-sizing: border-box;
+        padding: 14px 30px 20px;
+
+        .topDataRightLine {
+          width: 100%;
+          box-sizing: border-box;
+          margin: 10px 0;
+          display: flex;
+
+          .topDataRightLable {
+            display: inline-block;
+            width: 40px;
+            color: #fff;
+            line-height: 35px;
+            font-weight: normal;
+            font-size: 14px;
+          }
+
+          .topDataRightBtn {
+            border: none;
+            font-size: 14px;
+            background: #025bff;
+            color: #fff;
+            height: 35px;
+            flex: 3;
+            line-height: 35px;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+  }
+
+  .showDataTable {
+    .formSearch {
+      margin-bottom: 20px;
+
+      span {
+        color: #fff;
+        font-size: 14px;
+      }
+
+      .searchTableInp {
+        display: inline-block;
+        border: 1px solid rgba(3, 208, 255, 0.7);
+        border-radius: 3px;
+        background: transparent;
+        text-indent: 5px;
+        padding: 5px;
+        margin: 0 10px;
+        color: #fff;
+        width: 150px;
+        height: 35px;
+        box-sizing: border-box;
+        font-size: 12px;
+      }
+      
+      .searchTableBtn {
+        width: 90px;
+        border: none;
+        font-size: 14px;
+        color: #fff;
+        height: 35px;
+        line-height: 35px;
+        border-radius: 5px;
+        text-align: center;
+        cursor: pointer;
+      }
+    }
+  }
+  .rows{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+}
+
+
+</style>
+
+<style scoped>
+  .ProblemStandBook /deep/ .el-input--prefix .el-input__inner{
+    background: none;
+    width: 75%;
+    height: 2.8vw;
+    border: 1px solid rgba(3, 208, 255, 0.7);
+  }
+  .ProblemStandBook /deep/ .el-date-editor.el-input{
+    width: 15.1875vw;
+    margin-right: -35px;
+  }
+  .ProblemStandBook /deep/ .el-input__inner{
+    color: #fff !important;
+    margin-top: 3px;
+  }
+  .ProblemStandBook /deep/ .el-input__suffix{
+    right: 5vw !important;
+  }
+</style>

@@ -1,0 +1,165 @@
+// html{
+//   width: 1280px;
+//   height: 720px;
+//   margin: 0;
+// }
+body {
+  overflow-x: hidden;
+}
+
+html,
+body,
+.container,
+#app {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: PingFangSC-Medium;
+  background: #02468F;
+}
+
+ul,
+ol,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+figure,
+form,
+fieldset,
+legend,
+input,
+textarea,
+button,
+p,
+blockquote,
+th,
+td,
+pre,
+xmp {
+  margin: 0;
+  padding: 0;
+}
+
+// 变左浮动
+.public_floatleft {
+  float: left;
+}
+
+// 变右浮动
+.public_floatright {
+  float: right;
+}
+
+// 清楚浮动
+.public_overflow {
+  overflow: hidden;
+}
+
+// // 解决图片的三像素兼容问题
+// img{
+//   display: block;
+
+// }
+
+// 全局样式
+.content {
+  margin-top: -27px;
+  // height: 650px;
+}
+
+// 公共加边框的地方
+.border {
+  position: absolute;
+  padding: 5px;
+  border-style: solid;
+  border-color: #03D0FF;
+}
+
+.row1 {
+  border-width: 2px 0 0 2px;
+  top: -2px;
+  left: -2px;
+}
+
+.row2 {
+  border-width: 2px 2px 0 0;
+  top: -2px;
+  right: -2px;
+}
+
+.col1 {
+  border-width: 0 0 2px 2px;
+  bottom: -2px;
+  left: -2px;
+}
+
+.col2 {
+  border-width: 0 2px 2px 0;
+  bottom: -2px;
+  right: -2px;
+}
+
+//element表格的样式
+// .el-table--border::after, .el-table--group::after, .el-table::before{
+//   background: transparent!important;
+// }
+// .el-table td, .el-table th.is-leaf{
+//   border-bottom: none!important;
+// }
+// .el-table__header-wrapper tr :last-child{border-right:none!important}
+// .el-table--border td, .el-table--border th, .el-table__body-wrapper .el-table--border.is-scrolling-left~.el-table__fixed{
+//   border-right:1px solid #aaa!important
+// }
+.table-text-blue{
+  color: #fff;
+  cursor:pointer;
+ }
+ .table-text-gray{
+   color: #fff;
+ }
+ .el-table--border{
+   border:none;
+ }
+ .el-table,.el-table thead{
+   color:#fff;
+ }
+ 
+ // 共性问题处理
+input::-webkit-input-placeholder{ 
+ color:#fff;
+ }
+input::-moz-placeholder {
+ color: #fff;
+}
+input::-ms-input-placeholder {
+ color: #fff;
+}
+
+
+
+
+
+
+// #app {
+//   font-family: 'Avenir', Helvetica, Arial, sans-serif;
+//   -webkit-font-smoothing: antialiased;
+//   -moz-osx-font-smoothing: grayscale;
+//   text-align: center;
+//   color: #2c3e50;
+// }
+
+// #nav {
+
+//   a {
+//     font-weight: bold;
+//     color: #2c3e50;
+//     &.router-link-exact-active {
+//       color: #42b983;
+//     }
+//   }
+// }

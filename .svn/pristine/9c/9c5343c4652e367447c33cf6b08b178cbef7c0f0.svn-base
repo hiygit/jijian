@@ -1,0 +1,65 @@
+{
+  "_args": [
+    [
+      "sass@1.23.3",
+      "F:\\纪检项目\\monitor\\byqc"
+    ]
+  ],
+  "_development": true,
+  "_from": "sass@1.23.3",
+  "_id": "sass@1.23.3",
+  "_inBundle": false,
+  "_integrity": "sha1-8HUDuejSvPBu9p6L7qXQhVibFiA=",
+  "_location": "/sass",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "sass@1.23.3",
+    "name": "sass",
+    "escapedName": "sass",
+    "rawSpec": "1.23.3",
+    "saveSpec": null,
+    "fetchSpec": "1.23.3"
+  },
+  "_requiredBy": [
+    "#DEV:/"
+  ],
+  "_resolved": "https://registry.npm.taobao.org/sass/download/sass-1.23.3.tgz?cache=0&sync_timestamp=1572591296251&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fsass%2Fdownload%2Fsass-1.23.3.tgz",
+  "_spec": "1.23.3",
+  "_where": "F:\\纪检项目\\monitor\\byqc",
+  "author": {
+    "name": "Natalie Weizenbaum",
+    "email": "nweiz@google.com",
+    "url": "https://github.com/nex3"
+  },
+  "bin": {
+    "sass": "sass.js"
+  },
+  "bugs": {
+    "url": "https://github.com/sass/dart-sass/issues"
+  },
+  "dependencies": {
+    "chokidar": ">=2.0.0 <4.0.0"
+  },
+  "description": "A pure JavaScript implementation of Sass.",
+  "engines": {
+    "node": ">=8.9.0"
+  },
+  "homepage": "https://github.com/sass/dart-sass",
+  "keywords": [
+    "style",
+    "scss",
+    "sass",
+    "preprocessor",
+    "css"
+  ],
+  "license": "MIT",
+  "main": "sass.dart.js",
+  "name": "sass",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sass/dart-sass.git"
+  },
+  "version": "1.23.3"
+}

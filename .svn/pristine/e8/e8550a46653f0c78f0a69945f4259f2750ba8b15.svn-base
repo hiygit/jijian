@@ -1,0 +1,48 @@
+.selectyear{
+    // 修改element的尺寸
+    .el-select{
+        width: 58px;
+        height: 24px;
+        input::placeholder{
+            color: #fff;
+        }
+        .el-input{
+            font-size: 10px;
+
+            .el-input__inner{
+                width: 58px;
+                height: 24px;
+                border-radius: 0px;
+                padding-left: 5px;
+                background-color: #02468F;
+                color: #fff;
+                
+                
+            }
+            // 修改尖括号为三角形
+            .el-input__suffix{
+                .el-icon-arrow-up:before {
+
+                    content: "\e790";
+                
+                }
+            }
+            .el-input__icon{
+                color: #fff;
+                line-height: 24px;
+            }
+        }
+    }
+    // 设置margin值
+    .selectyear_margin{
+        margin-right: 5px;
+    }
+
+    
+}
+// 设置下拉框的宽度
+.selectyear_popper{
+    .el-select-dropdown__item{
+        padding: 0 10px;
+    }
+}
